@@ -1,14 +1,12 @@
-// src/pages/CHRDetails.jsx
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Clock, MapPin, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, User, Book, GraduationCap, Clock } from 'lucide-react';
 
 const CHRDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const report = location.state?.report || { date: '24 Nov 2025' };
 
-  // Mock Data for specific day
   const classes = [
     {
       id: 1,
@@ -29,101 +27,89 @@ const CHRDetails = () => {
       teacher: "Mr. Muhammad Ahsan",
       discipline: "BCS-5B",
       lateIn: "--",
-      leftEarly: "10 minutes",
+      leftEarly: "10 mins",
       remarks: "Left early for administrative work.",
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
       
-      {/* Header (Purple) */}
-      <div className="bg-purple-700 text-white pb-20 pt-8 px-8">
-        <div className="max-w-5xl mx-auto">
+      {/* Header with Back Button */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
           <button 
             onClick={() => navigate(-1)} 
-            className="flex items-center text-purple-100 hover:text-white transition-colors mb-6"
+            className="flex items-center text-green-700 hover:text-green-800 font-bold text-sm mb-2 transition-colors"
           >
-            <ArrowLeft size={20} className="mr-2" /> Back to Reports
+            <ArrowLeft size={18} className="mr-1" /> Back to List
           </button>
-          <h1 className="text-3xl font-bold">CHR Details</h1>
-          <p className="text-purple-200 mt-2">Detailed class records for <span className="font-bold text-white">{report.date}</span>.</p>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">CHR Analysis</h1>
+          <p className="text-gray-500 font-medium">Viewing details for <span className="text-green-700 font-bold">{report.date}</span></p>
         </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="max-w-5xl mx-auto px-8 -mt-12 pb-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-        
+      {/* Grid for Class Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {classes.map((cls) => {
           const isHeld = cls.status === "Held";
-          
           return (
-            <div 
-              key={cls.id} 
-              className={`bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-lg transition-all duration-300
-                ${isHeld ? 'border-green-100' : 'border-red-100'}
-              `}
-            >
-              {/* Card Header */}
-              <div className={`px-6 py-4 flex justify-between items-center border-b
-                  ${isHeld ? 'bg-green-50/50 border-green-100' : 'bg-red-50/50 border-red-100'}
-              `}>
-                <h3 className={`font-bold text-lg ${isHeld ? 'text-gray-800' : 'text-gray-800'}`}>{cls.subject}</h3>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1
-                  ${isHeld ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
-                `}>
-                  {isHeld ? <CheckCircle size={12}/> : <AlertCircle size={12}/>}
-                  {cls.status}
+            <div key={cls.id} className={`bg-white rounded-[2rem] border-2 shadow-sm overflow-hidden transition-all hover:shadow-md ${isHeld ? 'border-green-100' : 'border-red-100'}`}>
+              
+              {/* Card Title Bar */}
+              <div className={`px-6 py-4 flex justify-between items-center ${isHeld ? 'bg-green-50' : 'bg-red-50'}`}>
+                <div className="flex items-center gap-3">
+                  <Book size={20} className={isHeld ? 'text-green-600' : 'text-red-600'} />
+                  <h3 className="font-black text-gray-800">{cls.subject}</h3>
+                </div>
+                <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 ${isHeld ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                  {isHeld ? <CheckCircle size={12} /> : <AlertCircle size={12} />} {cls.status}
                 </span>
               </div>
 
-              {/* Card Body */}
-              <div className="p-6 space-y-4">
-                
-                {/* Info Grid */}
-                <div className="grid grid-cols-2 gap-y-4 text-sm">
-                  <div>
-                    <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Date</p>
-                    <p className="font-semibold text-gray-700">{cls.date}</p>
+              {/* Data Rows */}
+              <div className="p-8 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="flex items-start gap-3">
+                    <User size={16} className="text-gray-400 mt-1" />
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Instructor</p>
+                      <p className="text-sm font-bold text-gray-700">{cls.teacher}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Teacher</p>
-                    <p className="font-semibold text-gray-700">{cls.teacher}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Discipline</p>
-                    <p className="font-semibold text-gray-700">{cls.discipline}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Status</p>
-                    <p className={`font-semibold ${isHeld ? 'text-green-600' : 'text-red-500'}`}>{cls.status}</p>
+                  <div className="flex items-start gap-3">
+                    <GraduationCap size={16} className="text-gray-400 mt-1" />
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Discipline</p>
+                      <p className="text-sm font-bold text-gray-700">{cls.discipline}</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Timing Info */}
-                <div className="flex gap-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                  <div className="flex-1">
-                     <p className="text-xs text-gray-500 mb-1">Late In</p>
-                     <p className="font-bold text-gray-800">{cls.lateIn}</p>
+                {/* Late/Early Timing Box */}
+                <div className="bg-gray-50 rounded-2xl p-4 flex justify-around border border-gray-100">
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-gray-400 uppercase">Late In</p>
+                    <p className={`text-sm font-black ${cls.lateIn !== '--' ? 'text-red-600' : 'text-gray-700'}`}>{cls.lateIn}</p>
                   </div>
                   <div className="w-px bg-gray-200"></div>
-                  <div className="flex-1">
-                     <p className="text-xs text-gray-500 mb-1">Left Early</p>
-                     <p className="font-bold text-gray-800">{cls.leftEarly}</p>
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-gray-400 uppercase">Left Early</p>
+                    <p className={`text-sm font-black ${cls.leftEarly !== '--' ? 'text-red-600' : 'text-gray-700'}`}>{cls.leftEarly}</p>
                   </div>
                 </div>
 
-                {/* Remarks */}
-                <div>
-                  <p className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-2">Remarks</p>
-                  <p className="text-sm text-gray-600 italic leading-relaxed">"{cls.remarks}"</p>
+                {/* Remarks Section */}
+                <div className="bg-green-50/30 p-4 rounded-2xl border border-green-100/50">
+                  <p className="text-[10px] font-black text-green-700 uppercase mb-1 flex items-center gap-1">
+                    <Clock size={12} /> Remarks
+                  </p>
+                  <p className="text-sm text-gray-600 italic font-medium">"{cls.remarks}"</p>
                 </div>
-
               </div>
             </div>
           );
         })}
-
       </div>
     </div>
   );

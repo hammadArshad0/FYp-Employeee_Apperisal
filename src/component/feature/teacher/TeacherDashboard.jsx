@@ -1,113 +1,100 @@
-// src/pages/TeacherDashboard.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart2, Calendar, FileText, Users, LogOut, ChevronRight } from 'lucide-react';
+import { 
+  TrendingUp, Users, ClipboardCheck, BookOpen, 
+  ArrowRightCircle, Award, CheckCircle 
+} from 'lucide-react';
 
-const TeacherDashboard = () => {
+const TeacherStats = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem('user')) || { name: 'Instructor' };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+  // Teacher Actions - Matching Director Dashboard Style
+  const actions = [
+    { 
+      title: "Performance", 
+      desc: "Detailed KPI & Evaluations", 
+      icon: <TrendingUp size={24} />, 
+      path: "/teacher-dashboard/performance",
+      color: "hover:border-green-600 hover:bg-green-50"
+    },
+    { 
+      title: "Class Reports", 
+      desc: "Daily CHR Status & History", 
+      icon: <ClipboardCheck size={24} />, 
+      path: "/teacher-dashboard/chr",
+      color: "hover:border-purple-600 hover:bg-purple-50"
+    },
+    { 
+      title: "Course Management", 
+      desc: "Outlines & Resources", 
+      icon: <BookOpen size={24} />, 
+      path: "/teacher-dashboard/courses",
+      color: "hover:border-orange-600 hover:bg-orange-50"
+    },
+    { 
+      title: "Peer Evaluation", 
+      desc: "Evaluate Your Colleagues", 
+      icon: <Users size={24} />, 
+      path: "/teacher-dashboard/peer",
+      color: "hover:border-blue-600 hover:bg-blue-50"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans pb-12">
-      {/* Top Navigation */}
-      <nav className="bg-white shadow-sm px-8 py-4 flex justify-between items-center sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <div className="bg-green-100 p-2 rounded-lg text-green-700">
-            <BarChart2 size={24} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">Teacher Portal</h1>
-            <p className="text-xs text-gray-500">Welcome, {user?.name || 'Instructor'}</p>
-          </div>
+    <div className="space-y-8 animate-in fade-in duration-700">
+      
+      {/* 1. Welcome Banner - Exactly like Director Dashboard */}
+      <div className="bg-green-700 rounded-2xl p-8 text-white shadow-lg flex justify-between items-center overflow-hidden relative">
+        <div className="relative z-10">
+          <h2 className="text-3xl font-black mb-2 tracking-tight">Teacher Dashboard</h2>
+          <p className="text-green-50 text-lg opacity-90 font-medium">
+            Welcome, {user.name}. Employee Performance Appraisal.
+          </p>
         </div>
-        <button onClick={handleLogout} className="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-          Logout
-        </button>
-      </nav>
+        {/* Decorative Icon for background */}
+        <Award size={120} className="absolute -right-4 -bottom-4 text-white opacity-10 rotate-12" />
+      </div>
 
-      <div className="max-w-6xl mx-auto px-8 py-10">
+      {/* 2. Quick Action Cards - Grid Style */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-black text-gray-800 tracking-tight">Quick Actions</h3>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Select Module</p>
+        </div>
         
-        {/* KPI Summary Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-10 flex flex-col md:flex-row items-center gap-8">
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Performance Overview</h2>
-            <p className="text-gray-500 mb-6">Your current KPI score based on student evaluations and administrative tasks.</p>
-            
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="p-4 bg-green-50 rounded-xl border border-green-100">
-                <p className="text-2xl font-bold text-green-700">89%</p>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Academics</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {actions.map((action, index) => (
+            <button
+              key={index}
+              onClick={() => navigate(action.path)}
+              className={`flex flex-col items-start p-6 bg-white border-2 border-transparent rounded-2xl shadow-sm transition-all duration-200 text-left group ${action.color}`}
+            >
+              <div className="mb-4 p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-md transition-all text-gray-600 group-hover:text-inherit">
+                {action.icon}
               </div>
-              <div className="p-4 bg-orange-50 rounded-xl border border-orange-100">
-                <p className="text-2xl font-bold text-orange-700">10%</p>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Society</p>
+              <h4 className="text-lg font-black text-gray-800 mb-1 leading-tight">{action.title}</h4>
+              <p className="text-sm text-gray-500 font-medium leading-tight">{action.desc}</p>
+              
+              <div className="mt-4 flex items-center gap-1 text-[10px] font-black text-green-700 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter">
+                Open Module <ArrowRightCircle size={12} />
               </div>
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <p className="text-2xl font-bold text-blue-700">95%</p>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Admin</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Simple Bar Chart Visual */}
-          <div className="h-48 w-full md:w-1/3 flex items-end justify-between gap-2 px-4 border-b border-l border-gray-200">
-            {[40, 70, 55, 90, 30, 80].map((h, i) => (
-              <div key={i} className="w-full bg-green-600 rounded-t-md hover:opacity-80 transition-all" style={{ height: `${h}%` }}></div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions Grid */}
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* --- Class Held Report Card --- */}
-          <div 
-            onClick={() => navigate('/teacher/chr')}
-            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-lg hover:border-purple-200 transition-all group"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-purple-100 text-purple-600 rounded-xl">
-                <Calendar size={24} />
-              </div>
-              <ChevronRight className="text-gray-300 group-hover:text-purple-600 transition-colors" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800 mb-1">Class Held Report</h3>
-            <p className="text-sm text-gray-500">View your daily class attendance and schedule report status.</p>
-          </div>
-
-          {/* Other Dummy Cards */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-lg hover:border-orange-200 transition-all group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-orange-100 text-orange-600 rounded-xl">
-                <FileText size={24} />
-              </div>
-              <ChevronRight className="text-gray-300 group-hover:text-orange-600 transition-colors" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800 mb-1">Course Management</h3>
-            <p className="text-sm text-gray-500">Manage course materials, outlines, and student resources.</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-lg hover:border-teal-200 transition-all group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-teal-100 text-teal-600 rounded-xl">
-                <Users size={24} />
-              </div>
-              <ChevronRight className="text-gray-300 group-hover:text-teal-600 transition-colors" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800 mb-1">Society Mentorship</h3>
-            <p className="text-sm text-gray-500">Evaluate and guide your assigned student societies.</p>
-          </div>
-
+            </button>
+          ))}
         </div>
       </div>
+
+      {/* 3. Small Info Section (Optional) */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-6 flex items-center gap-4 shadow-sm">
+        <div className="bg-blue-50 text-blue-600 p-3 rounded-full">
+            <CheckCircle size={20} />
+        </div>
+        <p className="text-sm text-gray-600 font-medium">
+          Your last <span className="font-bold text-gray-800">Peer Evaluation</span> completed successfully. View your <span className="font-bold text-gray-800">Performance Report</span> for details.</p>
+      </div>
+
     </div>
   );
 };
 
-export default TeacherDashboard;
+export default TeacherStats;

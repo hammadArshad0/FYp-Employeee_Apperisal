@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Plus, UserPlus, BarChart3, LayoutDashboard, 
-  LogOut, Bell, BookOpen, Menu, X ,ChevronDown
+  LogOut, BookOpen, Menu, X ,ChevronDown,
+
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -15,6 +16,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'Add Peer Evaluator', path: '/hod-dashboard/add-evaluator', icon: <UserPlus size={30} /> },
     { name: 'See Performance', path: '/hod-dashboard/performance', icon: <BarChart3 size={30} /> },
     { name: 'Course Management', path: '/hod-dashboard/courses', icon: <BookOpen size={30} /> },
+    { name: 'CHR', path: '/hod-dashboard/chr', icon: <BarChart3 size={30} /> },
   ];
 
   return (

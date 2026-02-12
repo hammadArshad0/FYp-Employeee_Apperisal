@@ -20,34 +20,35 @@ const DirectorDashboard = () => {
 
   // Director Actions matching your menu items
   const actions = [
+   
     { 
-      title: "Teacher Form", 
-      desc: "Create Teacher Questionnaire", 
-      icon: <ClipboardList size={24} />, 
-      path: "/director-dashboard/make-questionnaire-teacher",
-      color: "hover:border-green-600 hover:bg-green-50"
-    },
-    { 
-      title: "Student Form", 
-      desc: "Create Student Questionnaire", 
+      title: " Questionnaire Form", 
+      desc: "Create  Questionnaire", 
       icon: <GraduationCap size={24} />, 
-      path: "/director-dashboard/make-questionnaire-student",
+      path: "/director-dashboard/make-questionnaire",
       color: "hover:border-blue-600 hover:bg-blue-50"
     },
     { 
-      title: "Strategic KPIs", 
+      title: "Add KPIs", 
       desc: "Define University KPIs", 
       icon: <PlusCircle size={24} />, 
       path: "/director-dashboard/add-kpi",
       color: "hover:border-emerald-600 hover:bg-emerald-50"
     },
     { 
-      title: "Confidential", 
+      title: "See Performance", 
       desc: "Sensitive Evaluations", 
+      icon: <BarChart3 size={24} />, 
+      path: "/director-dashboard/performance",
+      color: "hover:border-red-600 hover:bg-red-50"
+    },
+     { 
+      title: "Confidential Evaluations", 
+      desc: "View sensitive evaluations", 
       icon: <Lock size={24} />, 
       path: "/director-dashboard/confidential",
-      color: "hover:border-red-600 hover:bg-red-50"
-    }
+      color: "hover:border-green-600 hover:bg-green-50"
+    },
   ];
 
   return (
