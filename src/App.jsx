@@ -122,7 +122,7 @@ const App = () => {
           <Route path="Class-report/details" element={<CHRDetails />} />
           <Route path="courses" element={<SeeCourseManagement />} />
           <Route path="peer" element={<PeerEvaluation />} />
-          <Route path="peer-form/:teacherId/:courseCode" element={<PeerEvaluationForm />} />
+          <Route path="evaluate" element={<PeerEvaluationForm />} />
         </Route>
 
         {/* --- STUDENT & ADMIN ROUTES --- */}

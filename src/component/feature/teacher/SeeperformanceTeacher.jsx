@@ -32,8 +32,8 @@ const SeePerformanceTeacher = () => {
             KPI Performance Scoreboard
           </h3>
           <div className="bg-green-50 px-6 py-2 rounded-2xl border border-green-100 flex items-center gap-2">
-            <Award className="text-green-600" size={18} />
-            <span className="text-sm font-black text-green-700 uppercase tracking-widest">Grade: A+</span>
+            {/* <Award className="text-green-600" size={18} /> */}
+            {/* <span className="text-sm font-black text-green-700 uppercase tracking-widest">Grade: A+</span> */}
           </div>
         </div>
 
@@ -80,15 +80,15 @@ const SeePerformanceTeacher = () => {
 
         {/* Legend / Info Footer */}
         <div className="mt-20 pt-10 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center text-gray-400 gap-4">
-           <p className="text-[10px] font-black uppercase tracking-[0.2em]">Data Source: Quality Assurance Cell (QAC)</p>
+           {/* <p className="text-[10px] font-black uppercase tracking-[0.2em]">Data Source: Quality Assurance Cell (QAC)</p> */}
            <div className="flex gap-6 items-center">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                <span className="text-[10px] font-bold uppercase tracking-widest">Achieved</span>
+                {/* <div className="w-2 h-2 bg-green-600 rounded-full"></div> */}
+                {/* <span className="text-[10px] font-bold uppercase tracking-widest">Achieved</span> */}
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-gray-200 rounded-full"></div>
-                <span className="text-[10px] font-bold uppercase tracking-widest">Remaining</span>
+                {/* <span className="text-[10px] font-bold uppercase tracking-widest">Remaining</span> */}
               </div>
            </div>
         </div>

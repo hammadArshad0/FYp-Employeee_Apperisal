@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Award, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import DataService from '../../../services/axios';
 
 const EvaluationForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem('user')) || {};
   const course = location.state?.course;
 
   const [questions, setQuestions] = useState([]);
@@ -14,136 +14,83 @@ const EvaluationForm = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // --- Naya Rating Options Array ---
-  const ratingOptions = [
-    { label: 'Poor', value: 1 },
-    { label: 'Fair', value: 2 },
-    { label: 'Average', value: 3 },
-    { label: 'Good', value: 4 },
-    { label: 'Excellent', value: 5 }
-  ];
-
   useEffect(() => {
-    if (!course) {
-      navigate('/student-dashboard');
-      return;
-    }
+    if (!course) { navigate('/student-dashboard'); return; }
     fetchFormQuestions();
   }, []);
 
   const fetchFormQuestions = async () => {
     try {
-      const res = await DataService.get('/StudentEvaluation/GetEvaluationForm');
-      setQuestions(res.data.Questions);
-    } catch (err) {
-      alert("Error loading questionnaire!");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSelect = (questionId, value) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+      setLoading(true);
+      const res = await DataService.get('/Student/GetActiveQuestionnaire/S');
+      if (res.data?.Questions) setQuestions(res.data.Questions);
+    } catch (err) { console.error(err); } 
+    finally { setLoading(false); }
   };
 
   const handleSubmit = async () => {
-    if (Object.keys(answers).length < questions.length) {
-      alert("Please answer all questions.");
-      return;
-    }
-
     try {
       setSubmitting(true);
       const payload = {
         EnrollmentId: course.EnrollmentId,
-        Answers: Object.entries(answers).map(([qId, score]) => ({
-          QuestionId: parseInt(qId),
-          Score: score
-        }))
+        Answers: Object.entries(answers).map(([qId, score]) => ({ QuestionId: parseInt(qId), Score: score }))
       };
-
-      await DataService.post('/StudentEvaluation/SubmitEvaluation', payload);
+      await DataService.post('/Student/SubmitEvaluation', payload);
       alert("Evaluation saved successfully!");
       navigate('/student-dashboard');
-    } catch (err) {
-      alert("Submission failed!");
-    } finally {
-      setSubmitting(false);
-    }
+    } catch (err) { alert("Error!"); } 
+    finally { setSubmitting(false); }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin text-green-600" size={40} /></div>;
+  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-green-600" size={50}/></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="bg-white border-b sticky top-0 z-20 px-6 py-4">
-        <button onClick={() => navigate(-1)} className="flex items-center text-gray-500 mb-2 hover:text-green-600 transition-colors font-medium">
-          <ArrowLeft size={18} className="mr-2" /> Back to Dashboard
-        </button>
-        <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-          <div 
-            className="bg-green-600 h-full transition-all duration-500" 
-            style={{ width: `${(Object.keys(answers).length / questions.length) * 100}%` }}
-          ></div>
+    <div className="min-h-screen bg-gray-50 pb-16">
+      {/* Horizontal Info Header */}
+      <div className="bg-white border-b-2 border-green-700 shadow-sm sticky top-0 z-20 px-10 py-5">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-6">
+          <button onClick={() => navigate(-1)} className="flex items-center text-gray-700 font-black text-lg hover:text-green-600 transition-colors">
+            <ArrowLeft size={24} className="mr-2" /> BACK
+          </button>
+          
+          <div className="flex flex-wrap gap-x-12 gap-y-3 text-sm font-black uppercase tracking-normal text-gray-500">
+            <div className="flex gap-2">STUDENT: <span className="text-gray-900">{user.name} ({user.id})</span></div>
+            <div className="flex gap-2">SESSION: <span className="text-gray-900">{user.sessionName || 'Fall 2025'}</span></div>
+            <div className="flex gap-2">COURSE: <span className="text-green-600">{course?.CourseTitle}</span></div>
+            <div className="flex gap-2">TEACHER: <span className="text-gray-900">{course?.TeacherName}</span></div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 mt-8">
-        <div className="bg-white rounded-2xl shadow-sm border p-6 mb-8">
-          <div className="flex items-center gap-2 text-green-600 font-bold text-xl mb-4"><Award /> Evaluation Details</div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div><p className="text-gray-400 font-semibold uppercase text-[10px]">Teacher</p><p className="font-bold text-gray-700">{course.TeacherName}</p></div>
-            <div><p className="text-gray-400 font-semibold uppercase text-[10px]">Course</p><p className="font-bold text-gray-700">{course.CourseCode}</p></div>
-            <div><p className="text-gray-400 font-semibold uppercase text-[10px]">Student</p><p className="font-bold text-gray-700">{user?.name}</p></div>
-            <div><p className="text-gray-400 font-semibold uppercase text-[10px]">Session</p><p className="font-bold text-gray-700">Fall 2025</p></div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
+      <div className="max-w-5xl mx-auto px-8 mt-12">
+        <div className="space-y-8">
           {questions.map((q, idx) => (
-            <div key={q.QuestionId} className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
-              <h3 className="text-lg font-bold text-gray-800 mb-8">{idx + 1}. {q.Text}</h3>
-              
-              {/* --- Yahan Rating Labels Render Ho Rahe Hain --- */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                {ratingOptions.map((opt) => {
-                  const isSelected = answers[q.QuestionId] === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => handleSelect(q.QuestionId, opt.value)}
-                      className={`
-                        py-4 px-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all duration-200
-                        ${isSelected 
-                          ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-100 scale-105' 
-                          : 'bg-white border-gray-200 text-gray-500 hover:border-green-200 hover:bg-green-50'
-                        }
-                      `}
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
+            <div key={q.QuestionId} className="bg-white p-10 rounded-2xl border-2 border-gray-100 shadow-md">
+              <h3 className="text-xl font-black text-gray-800 mb-8 leading-snug">
+                <span className="text-green-600 mr-2">{idx + 1}.</span> {q.Text}
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map(val => (
+                  <button 
+                    key={val}
+                    onClick={() => setAnswers({...answers, [q.QuestionId]: val})}
+                    className={`py-5 rounded-2xl border-2 font-black text-sm uppercase transition-all duration-200 ${answers[q.QuestionId] === val ? 'bg-green-600 border-green-600 text-white scale-105 shadow-xl' : 'bg-white text-gray-400 border-gray-100 hover:border-green-300 hover:bg-green-50'}`}
+                  >
+                    {val === 1 ? 'Poor' : val === 2 ? 'Average' : val === 3 ? 'Good' : 'Excellent'}
+                  </button>
+                ))}
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 flex justify-end">
-          <button 
-            disabled={submitting || Object.keys(answers).length < questions.length}
-            onClick={handleSubmit}
-            className={`
-              flex items-center gap-2 px-12 py-4 rounded-xl font-black uppercase tracking-widest text-white transition-all transform active:scale-95
-              ${Object.keys(answers).length === questions.length 
-                ? 'bg-green-600 hover:bg-green-700 shadow-xl shadow-green-100 cursor-pointer' 
-                : 'bg-gray-300 cursor-not-allowed'}
-            `}
-          >
-            {submitting ? <Loader2 className="animate-spin" /> : <CheckCircle size={20} />}
-            {submitting ? 'Submitting...' : 'Complete Evaluation'}
-          </button>
-        </div>
+        <button 
+          disabled={submitting || Object.keys(answers).length < questions.length}
+          onClick={handleSubmit}
+          className={`w-full py-6 rounded-2xl font-black text-xl uppercase mt-12 shadow-2xl transition-all ${Object.keys(answers).length === questions.length ? 'bg-green-700 text-white hover:bg-black active:scale-95' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+        >
+          {submitting ? 'Submitting...' : 'Complete Evaluation'}
+        </button>
       </div>
     </div>
   );

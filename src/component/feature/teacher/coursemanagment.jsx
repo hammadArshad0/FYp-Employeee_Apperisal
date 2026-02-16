@@ -43,11 +43,11 @@ const SeeCourseManagement = () => {
 
             <div className="mt-6 flex gap-3">
               <button className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-green-50 text-gray-600 hover:text-green-700 py-2.5 rounded-xl text-xs font-black uppercase transition-all border border-transparent hover:border-green-100">
-                <FileText size={16} /> Outline
+                <FileText size={16} /> HOd Remarks
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-green-50 text-gray-600 hover:text-green-700 py-2.5 rounded-xl text-xs font-black uppercase transition-all border border-transparent hover:border-green-100">
+              {/* <button className="flex-1 flex items-center justify-center gap-2 bg-gray-50 hover:bg-green-50 text-gray-600 hover:text-green-700 py-2.5 rounded-xl text-xs font-black uppercase transition-all border border-transparent hover:border-green-100">
                 <Download size={16} /> Resources
-              </button>
+              </button> */}
             </div>
           </div>
         ))}

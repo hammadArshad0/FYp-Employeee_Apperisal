@@ -75,7 +75,7 @@ const EditEvaluationQuestionnaire = () => {
       
       await DataService.post('/Questions/SaveAllChanges', payload);
       alert("Changes saved successfully!");
-      navigate('/director-dashboard/make-questionnaire-student');
+      navigate('/director-dashboard/make-questionnaire');
     } catch (err) {
       console.error("Save Error:", err);
       alert(err.response?.data?.Message || "Update fail ho gaya.");
