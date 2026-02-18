@@ -1,96 +1,109 @@
-import React from 'react';
-import { Award, TrendingUp, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
+import { TrendingUp, CheckCircle2, Loader2 } from 'lucide-react';
+import DataService from '../../../services/axios';
 
 const SeePerformanceTeacher = () => {
-  // Sirf aapki batai hui categories
-  const performanceData = [
-    { label: 'Student Evaluation', score: 90 },
-    { label: 'Peer Evaluation', score: 85 },
-    { label: 'Society Contribution', score: 70 },
-    { label: 'Academic Score', score: 95 },
-  ];
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const teacherId = localStorage.getItem('userId');
+  const sessionId = 5; // Aapka current session
+
+  useEffect(() => {
+    const fetchPerformance = async () => {
+      try {
+        const res = await DataService.get(`/Performance/GetTeacherPerformanceAnalytics/${teacherId}/${sessionId}`);
+        setData(res.data);
+      } catch (err) {
+        console.error("Error fetching data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPerformance();
+  }, [teacherId]);
+
+  if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-green-700" size={40} /></div>;
+  if (!data) return <div className="text-center p-20 font-bold text-red-500">No Data Found for Session {sessionId}</div>;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-8 p-6 bg-gray-50 min-h-screen">
       
-      {/* 1. Header Banner */}
-      <div className="bg-green-700 rounded-[2rem] p-8 text-white shadow-lg flex justify-between items-center relative overflow-hidden">
+      {/* 1. Statistics Header */}
+      <div className="bg-green-700 rounded-[2rem] p-8 text-white shadow-xl flex justify-between items-center relative overflow-hidden">
         <div className="relative z-10">
-          <h2 className="text-3xl font-black mb-2 tracking-tight">Teacher Performance</h2>
-          <p className="text-green-50 text-lg opacity-90 font-medium">
-            Summary of your professional evaluations and contributions.
-          </p>
+          <h2 className="text-3xl font-black mb-2 italic uppercase">Performance Analytics</h2>
+          <p className="text-green-100 opacity-80 font-medium">Session ID: {data.SessionID} | Teacher: {data.TeacherID}</p>
         </div>
-        <TrendingUp size={120} className="absolute -right-4 -bottom-4 text-white opacity-10 rotate-12" />
+        <div className="z-10 text-right">
+          <span className="text-xs font-bold opacity-70 uppercase tracking-tighter">Overall Score</span>
+          <div className="text-5xl font-black">{data.OverallPercentage}%</div>
+        </div>
+        <TrendingUp size={150} className="absolute -right-10 -bottom-10 text-white opacity-10 rotate-12" />
       </div>
 
-      {/* 2. Main Graph Card */}
-      <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
-        <div className="flex justify-between items-center mb-16">
-          <h3 className="text-xl font-black text-gray-800 flex items-center gap-2 italic">
-            <CheckCircle2 className="text-green-600" size={24} />
-            KPI Performance Scoreboard
-          </h3>
-          <div className="bg-green-50 px-6 py-2 rounded-2xl border border-green-100 flex items-center gap-2">
-            {/* <Award className="text-green-600" size={18} /> */}
-            {/* <span className="text-sm font-black text-green-700 uppercase tracking-widest">Grade: A+</span> */}
-          </div>
+      {/* 2. Proper Recharts Graph Card */}
+      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+        <div className="flex items-center gap-3 mb-10">
+          <CheckCircle2 className="text-green-600" size={28} />
+          <h3 className="text-xl font-black text-gray-800 uppercase italic">KPI Weightage vs Achievement</h3>
         </div>
 
-        {/* The Graph Area - 4 Boxes Only */}
-        <div className="flex justify-around items-end gap-10 h-80 px-4 max-w-5xl mx-auto">
-          {performanceData.map((item, index) => (
-            <div key={index} className="flex-1 flex flex-col items-center h-full group">
+        <div className="h-[400px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data.GraphData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="name" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{fill: '#6b7280', fontWeight: 700, fontSize: 12}} 
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{fill: '#9ca3af', fontSize: 12}}
+                domain={[0, 'dataMax + 10']}
+              />
+              <Tooltip 
+                cursor={{fill: '#f8fafc'}}
+                contentStyle={{borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}}
+              />
+              <Legend verticalAlign="top" align="right" wrapperStyle={{paddingBottom: '20px'}} />
               
-              {/* Score Label (Floating) */}
-              <div className="mb-4 transform translate-y-2 group-hover:-translate-y-1 transition-all duration-300">
-                <span className="bg-green-700 text-white text-xs font-black px-3 py-1.5 rounded-lg shadow-lg">
-                  {item.score}%
-                </span>
-              </div>
+              {/* Target/Max Weight Bar (Background) */}
+              <Bar dataKey="max" name="Target Weight" fill="#e5e7eb" radius={[10, 10, 0, 0]} barSize={50} />
+              
+              {/* Achieved Score Bar (Foreground) */}
+              <Bar dataKey="score" name="Your Score" radius={[10, 10, 0, 0]} barSize={50}>
+                {data.GraphData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-              {/* Main Container Box (Khaali Hissa) */}
-              <div className="w-full max-w-[100px] h-full bg-gray-50 rounded-2xl border-2 border-gray-100 relative overflow-hidden flex items-end shadow-inner transition-all group-hover:border-green-300 group-hover:shadow-md">
-                
-                {/* The Filling Color (Green Hissa - Based on 90, 85 etc) */}
-                <div 
-                  className="w-full bg-green-600 rounded-b-[14px] transition-all duration-1000 ease-out relative group-hover:bg-green-500"
-                  style={{ height: `${item.score}%` }}
-                >
-                  {/* Subtle Light Reflection on top of the green fill */}
-                  <div className="absolute top-0 left-0 w-full h-1 bg-white/30"></div>
-                  
-                  {/* Vertical Watermark inside the filled area */}
-                  <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white/20 rotate-90 uppercase tracking-widest whitespace-nowrap">
-                    BIIT PERFORMANCE
-                  </span>
+        {/* 3. Detailed Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+          {data.GraphData.map((kpi, idx) => (
+            <div key={idx} className="p-6 rounded-3xl bg-gray-50 border border-gray-100 hover:shadow-md transition-all">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{kpi.name}</p>
+              <div className="flex justify-between items-end">
+                <h4 className="text-2xl font-black text-gray-800">{kpi.score} <span className="text-sm text-gray-400">/ {kpi.max}</span></h4>
+                <div className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">
+                  {Math.round((kpi.score/kpi.max)*100)}%
                 </div>
               </div>
-
-              {/* Label at Bottom */}
-              <div className="mt-8 text-center">
-                <p className="text-xs font-black text-gray-500 uppercase tracking-tighter leading-tight mb-1 group-hover:text-green-700 transition-colors">
-                  {item.label}
-                </p>
-                <div className="h-1.5 w-8 bg-gray-100 rounded-full mx-auto group-hover:w-12 group-hover:bg-green-600 transition-all"></div>
+              <div className="w-full bg-gray-200 h-1.5 rounded-full mt-4">
+                <div 
+                  className="h-full rounded-full transition-all duration-1000" 
+                  style={{ width: `${(kpi.score/kpi.max)*100}%`, backgroundColor: kpi.color }}
+                ></div>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Legend / Info Footer */}
-        <div className="mt-20 pt-10 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center text-gray-400 gap-4">
-           {/* <p className="text-[10px] font-black uppercase tracking-[0.2em]">Data Source: Quality Assurance Cell (QAC)</p> */}
-           <div className="flex gap-6 items-center">
-              <div className="flex items-center gap-2">
-                {/* <div className="w-2 h-2 bg-green-600 rounded-full"></div> */}
-                {/* <span className="text-[10px] font-bold uppercase tracking-widest">Achieved</span> */}
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-gray-200 rounded-full"></div>
-                {/* <span className="text-[10px] font-bold uppercase tracking-widest">Remaining</span> */}
-              </div>
-           </div>
         </div>
       </div>
     </div>

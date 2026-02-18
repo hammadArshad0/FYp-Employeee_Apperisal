@@ -41,14 +41,31 @@ const LoginPage = () => {
       // --- ERROR FIX END ---
 
       // Navigation Logic
-      switch (userData.role) {
-        case 'HOD': navigate('/hod-dashboard'); break;
-        case 'Teacher': navigate('/teacher-dashboard'); break;
-        case 'Student': navigate('/student-dashboard'); break;
-        case 'Admin': navigate('/admin-dashboard'); break;
-        case 'Director': navigate('/director-dashboard'); break;
-        default: navigate('/'); 
-      }
+   // Login logic ke switch case mein S03 ka check
+switch (userData.role) {
+    case 'HOD': 
+        navigate('/hod-dashboard'); 
+        break;
+    case 'Teacher': 
+        navigate('/teacher-dashboard'); 
+        break;
+    case 'Student': 
+        // Agar role Student hai, toh ID check karein
+        if (userData.id === 'S03') {
+            navigate('/student/confidential-evaluation');
+        } else {
+            navigate('/student-dashboard');
+        }
+        break;
+    case 'Admin': 
+        navigate('/admin-dashboard'); 
+        break;
+    case 'Director': 
+        navigate('/director-dashboard'); 
+        break;
+    default: 
+        navigate('/'); 
+}
 
     } catch (err) {
       console.error(err);
@@ -79,7 +96,7 @@ const LoginPage = () => {
       {/* Login Card */}
       <div className="relative z-10 bg-white/80 backdrop-blur-md p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md border border-white/20">
         <div className="text-center">
-          <img src={logo} alt="BIIT Logo" className="h-24 w-auto mx-auto mb-4 object-contain drop-shadow-xl"/>
+          <img src={logo} alt="BIIT Logo" className="h-32 w-auto mx-auto  object-contain drop-shadow-xl"/>
           <h1 className="text-4xl font-black text-green-800 tracking-tighter uppercase italic">BIIT</h1>
           <p className="text-gray-600 font-bold text-[10px] tracking-[0.2em] uppercase mt-1">
             Barani Institute of Information Technology
