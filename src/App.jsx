@@ -50,7 +50,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
       Director: "/director-dashboard",
       HOD: "/hod-dashboard",
       Teacher: "/teacher-dashboard",
-      Student: userId === "S03" ? "/student/confidential-evaluation" : "/student-dashboard",
+      Student: userId === "2" ? "/student/confidential-evaluation" : "/student-dashboard",
       Admin: "/admin-dashboard"
     };
     return <Navigate to={rolePaths[user.role] || "/login"} replace />;
@@ -97,7 +97,7 @@ const App = () => {
           <Route path="Class-report/details" element={<CHRDetails />} />
           <Route path="courses" element={<SeeCourseManagement />} />
           <Route path="peer" element={<PeerEvaluation />} />
-          <Route path="evaluate" element={<PeerEvaluationForm />} />
+          <Route path="evaluate/:teacherId/:courseCode" element={<PeerEvaluationForm />} />
         </Route>
 
         {/* --- STUDENT ROUTES --- */}
