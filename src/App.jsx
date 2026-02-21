@@ -50,7 +50,8 @@ const ProtectedRoute = ({ children, allowedRole }) => {
       Director: "/director-dashboard",
       HOD: "/hod-dashboard",
       Teacher: "/teacher-dashboard",
-      Student: userId === "2" ? "/student/confidential-evaluation" : "/student-dashboard",
+      Student:  "/student-dashboard", 
+      // userId === "2" ? "/student/confidential-evaluation" :
       Admin: "/admin-dashboard"
     };
     return <Navigate to={rolePaths[user.role] || "/login"} replace />;

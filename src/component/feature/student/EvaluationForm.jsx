@@ -7,10 +7,7 @@ const EvaluationForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // LocalStorage se user info (jis mein sessionName backend se aa raha hai)
   const user = JSON.parse(localStorage.getItem('user')) || {};
-  
-  // Dashboard se navigate hote waqt jo course data bheja tha
   const course = location.state?.course;
 
   const [questions, setQuestions] = useState([]);
@@ -72,12 +69,11 @@ const EvaluationForm = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      {/* --- ENHANCED HEADER SECTION --- */}
+      {/* --- HEADER SECTION --- */}
       <div className="bg-white border-b-2 border-green-700 shadow-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
             
-            {/* Back Button & Session */}
             <div className="flex items-center gap-4">
               <button onClick={() => navigate(-1)} className="flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-black px-4 py-2 rounded-xl transition-all text-sm">
                 <ArrowLeft size={20} className="mr-2" /> BACK
@@ -88,7 +84,6 @@ const EvaluationForm = () => {
               </div>
             </div>
 
-            {/* Course & Teacher Details */}
             <div className="flex flex-wrap justify-center gap-8">
               <div className="flex items-center gap-3">
                 <div className="bg-green-100 p-2 rounded-lg text-green-700"><BookOpen size={18}/></div>
@@ -109,7 +104,6 @@ const EvaluationForm = () => {
               </div>
             </div>
 
-            {/* Student ID Badge */}
             <div className="hidden xl:block">
               <span className="bg-green-700 text-white px-4 py-2 rounded-full font-black text-xs uppercase">
                 Arid no: {user.id}
@@ -120,11 +114,21 @@ const EvaluationForm = () => {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 mt-12">
+        {/* --- DYNAMIC CHECK: AGAR QUESTIONS NA MILAIN --- */}
         {questions.length === 0 ? (
-          <div className="bg-white p-20 rounded-3xl text-center shadow-sm border-2 border-dashed border-gray-200">
-            <AlertCircle className="mx-auto text-gray-300 mb-4" size={60} />
-            <h3 className="text-xl font-bold text-gray-500 uppercase">No Questions Found</h3>
-            <p className="text-gray-400 mt-2">Evaluation period might be closed.</p>
+          <div className="bg-white p-20 rounded-[3rem] text-center shadow-xl border-2 border-dashed border-gray-200 mt-10">
+            <AlertCircle className="mx-auto text-yellow-500 mb-6" size={80} />
+            <h3 className="text-2xl font-black text-gray-800 uppercase italic">Evaluation Not Available</h3>
+            <p className="text-gray-400 mt-4 font-bold text-lg leading-relaxed">
+          
+              The evaluation period might have  hasn't started yet.
+            </p>
+            <button 
+              onClick={() => navigate('/student-dashboard')}
+              className="mt-10 bg-green-700 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg"
+            >
+              Back to Dashboard
+            </button>
           </div>
         ) : (
           <div className="space-y-6">
@@ -140,7 +144,7 @@ const EvaluationForm = () => {
                       onClick={() => setAnswers({...answers, [q.QuestionId]: val})}
                       className={`py-4 rounded-xl border-2 font-black text-xs uppercase transition-all duration-200 ${
                         answers[q.QuestionId] === val 
-                        ? 'bg-green-700 border-green-700 text-white shadow-lg' 
+                        ? 'bg-green-700 border-green-700 text-white shadow-lg scale-105' 
                         : 'bg-white text-gray-400 border-gray-100 hover:border-green-300 hover:text-green-600'
                       }`}
                     >

@@ -27,32 +27,39 @@ const [isModalOpen, setIsModalOpen] = useState(false);
     fetchInitialData();
   }, []);
 
-  const fetchCourses = async () => {
+const fetchCourses = async () => {
     if (!selectedSession) return;
     setLoading(true);
     try {
       const res = await DataService.get(`/CourseManagement/EnrollmentCourses/${selectedSession}`);
       
-      // --- Grouping Logic Start ---
-      // Hum data ko teacher ke naam se group kar rahe hain
+      // Check karein ke data empty toh nahi
+      if (!res.data || res.data.length === 0) {
+        setCourses([]);
+        return;
+      }
+
+      // --- Updated Grouping Logic ---
       const grouped = res.data.reduce((acc, current) => {
-        const teacherName = current.teacher;
+        // Backend se naye names: teacherName aur courseTitle
+        const teacherName = current.teacherName || current.teacher; 
+        
         if (!acc[teacherName]) {
           acc[teacherName] = {
             teacher: teacherName,
-            enrolledCourses: [] // Ismein teacher ke saare courses jayenge
+            enrolledCourses: []
           };
         }
+        
         acc[teacherName].enrolledCourses.push({
-          id: current.id,
-          code: current.code,
-          course: current.course
+          // id ki jagah ab unique key use karein ya courseCode
+          code: current.courseCode || current.code,
+          course: current.courseTitle || current.course
         });
         return acc;
       }, {});
       
-      setCourses(Object.values(grouped)); // Array mein convert karke state set karein
-      // --- Grouping Logic End ---
+      setCourses(Object.values(grouped));
 
     } catch (err) {
       console.error("Courses load error", err);

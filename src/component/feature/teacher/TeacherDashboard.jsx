@@ -53,7 +53,7 @@ const TeacherStats = () => {
           </p>
         </div>
         {/* Decorative Icon for background */}
-        <Award size={120} className="absolute -right-4 -bottom-4 text-white opacity-10 rotate-12" />
+        {/* <Award size={120} className="absolute -right-4 -bottom-4 text-white opacity-10 rotate-12" /> */}
       </div>
 
       {/* 2. Quick Action Cards - Grid Style */}
@@ -86,11 +86,11 @@ const TeacherStats = () => {
 
       {/* 3. Small Info Section (Optional) */}
       <div className="bg-white border border-gray-100 rounded-2xl p-6 flex items-center gap-4 shadow-sm">
-        <div className="bg-blue-50 text-blue-600 p-3 rounded-full">
-            <CheckCircle size={20} />
+        <div className="bg-blue-0  p-3 rounded-full">
+            {/* <CheckCircle size={20} /> */}
         </div>
-        <p className="text-sm text-gray-600 font-medium">
-          Your last <span className="font-bold text-gray-800">Peer Evaluation</span> completed successfully. View your <span className="font-bold text-gray-800">Performance Report</span> for details.</p>
+        {/* <p className="text-sm text-gray-600 font-medium">
+          Your last <span className="font-bold text-gray-800">Peer Evaluation</span> completed successfully. View your <span className="font-bold text-gray-800">Performance Report</span> for details.</p> */}
       </div>
 
     </div>
