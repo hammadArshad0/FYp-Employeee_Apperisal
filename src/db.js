@@ -1,7 +1,11 @@
+// src/db/dexieDB.js
 import Dexie from 'dexie';
 
-export const db = new Dexie('ConfidentialDB');
+const db = new Dexie('ConfidentialEvaluationDB');
+
 db.version(1).stores({
-  // studentId par indexing zaroori hai taake dashboard wahi data uthaye
-  evaluations: 'id, studentId, courseCode, enrollmentId' 
+  // Primary key: [studentId+enrollmentId+questionId] - composite unique key
+  evaluations: '[studentId+enrollmentId+questionId], studentId, teacherId, sessionId, enrollmentId'
 });
+
+export default db;
