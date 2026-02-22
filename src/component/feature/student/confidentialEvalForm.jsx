@@ -123,7 +123,7 @@ const ConfidentialEvaluationsForm = () => {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-6 mt-12">
+      <div className="max-w-6xl mx-auto px-6 mt-12">
         
         {/* --- DYNAMIC CHECK (FLAG 0) --- */}
         {questions.length === 0 ? (

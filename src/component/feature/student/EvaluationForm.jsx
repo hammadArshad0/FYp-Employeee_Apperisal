@@ -113,7 +113,7 @@ const EvaluationForm = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 mt-12">
+      <div className="max-w-6xl mx-auto px-6 mt-12">
         {/* --- DYNAMIC CHECK: AGAR QUESTIONS NA MILAIN --- */}
         {questions.length === 0 ? (
           <div className="bg-white p-20 rounded-[3rem] text-center shadow-xl border-2 border-dashed border-gray-200 mt-10">

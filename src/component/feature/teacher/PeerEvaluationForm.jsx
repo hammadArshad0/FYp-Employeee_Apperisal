@@ -88,7 +88,7 @@ const PeerEvaluationForm = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-8 mt-12">
+      <div className="max-w-6xl mx-auto px-8 mt-12">
         {/* --- DYNAMIC CHECK: NO QUESTIONS FOUND --- */}
         {questions.length === 0 ? (
           <div className="bg-white p-20 rounded-[3rem] text-center shadow-sm border-2 border-dashed border-gray-200">
