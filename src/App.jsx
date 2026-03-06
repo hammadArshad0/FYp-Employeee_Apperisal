@@ -32,9 +32,11 @@ import CHRDetails from './component/feature/teacher/CHRDetails';
 import PeerEvaluationForm from './component/feature/teacher/PeerEvaluationForm';
 
 // --- CONFIDENTIAL COMPONENTS ---
-import ConfidentialEvaluations from './component/other/dir/confidentialEvaluations'; // Admin view
+// Admin view
 import ConfidentialEvaluationsForm from './component/feature/student/confidentialEvalForm'; // S03 Form
 import ConfidentialEvaluationsData from './component/feature/student/confidentialEvalution'; // S03 List
+import ConfidentialEvaluations from './component/feature/director/seeConfidentialEvaluations';
+import SocietyManagement from './component/feature/hod/SocietyManagement';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -88,6 +90,7 @@ const App = () => {
           <Route path="performance" element={<SeePerformance />} />
           <Route path="courses" element={<CourseManagement />} />
           <Route path="chr" element={<CHRManagement />} />
+          <Route path="societies" element={<SocietyManagement />} />
         </Route>
 
         {/* --- TEACHER ROUTES --- */}

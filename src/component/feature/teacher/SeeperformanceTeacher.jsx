@@ -147,18 +147,18 @@ const SeePerformanceTeacher = () => {
         {/* HEADER */}
         <div className="bg-green-800 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] text-white flex flex-col md:flex-row justify-between items-center shadow-2xl relative overflow-hidden">
           <div className="absolute right-0 top-0 opacity-10 rotate-12 hidden md:block">
-            <Target size={200} />
+            {/* <Target size={200} /> */}
           </div>
           <div className="relative z-10 text-center md:text-left mb-6 md:mb-0">
-            <h2 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter">Performance Hub</h2>
-            <p className="text-green-300 font-bold text-[10px] md:text-xs mt-2 tracking-widest uppercase italic">
+            <h2 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter">Performance </h2>
+            <p className="text-white font-bold text-[10px] md:text-xs mt-2 tracking-widest uppercase italic">
               Session Analysis: {data?.SessionName}
             </p>
           </div>
-          <div className="relative z-10 bg-white/10 backdrop-blur-md p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] border border-white/20 text-center min-w-[150px] md:min-w-[200px]">
+          {/* <div className="relative z-10 bg-white/10 backdrop-blur-md p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] border border-white/20 text-center min-w-[150px] md:min-w-[200px]">
             <p className="text-[8px] md:text-[10px] font-black uppercase opacity-70 italic mb-1">Overall Efficiency</p>
             <p className="text-4xl md:text-6xl font-black italic text-white">{overallPercentage}%</p>
-          </div>
+          </div> */}
         </div>
 
         {/* SECTION 1: BAR GRAPH */}
@@ -168,8 +168,8 @@ const SeePerformanceTeacher = () => {
               <BarChart3 size={24} className="md:w-7 md:h-7" />
             </div>
             <div>
-              <h3 className="text-xl md:text-3xl font-black text-slate-800 uppercase italic leading-none">Sub-KPI Metrics</h3>
-              <p className="text-slate-400 text-[8px] md:text-[10px] font-bold uppercase mt-1 tracking-widest italic">Consolidated Evaluation Results</p>
+              <h3 className="text-xl md:text-3xl font-black text-slate-800 uppercase italic leading-none">See performance</h3>
+              <p className="text-slate-400 text-[8px] md:text-[10px] font-bold uppercase mt-1 tracking-widest italic"> Evaluation Results</p>
             </div>
           </div>
           <div className="w-full overflow-x-auto pb-6 scrollbar-thin scrollbar-thumb-slate-200">

@@ -45,7 +45,7 @@ const ConfidentialEvaluationsData = () => {
       setLoading(false);
     }
   };
-
+console.log(user.name)
   const handleSendReport = async () => {
     try {
       setReportLoading(true);
@@ -56,7 +56,7 @@ const ConfidentialEvaluationsData = () => {
         .toArray();
 
       if (!dexieData || dexieData.length === 0) {
-        alert("Koi evaluated data nahi mila. Pehle kuch courses evaluate karein.");
+        alert("no confidential Evalution found. Please complete at least one evaluation before sending the report.");
         return;
       }
 
@@ -65,7 +65,7 @@ const ConfidentialEvaluationsData = () => {
         { evaluations: dexieData }
       );
 
-      alert(res.data.message || "Report sent to admin!");
+      alert(res.data.message || "Report sent !");
     } catch (err) {
       console.error("Backend Error:", err.response?.data);
       alert(err.response?.data || "Failed to send report.");
@@ -127,9 +127,9 @@ const ConfidentialEvaluationsData = () => {
 
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
             <div>
-              <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-2">Management Evaluation</h2>
+              <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-2">Confidential Evaluation</h2>
               <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">
-                Academic Year: <span className="text-red-500">{user.sessionName}</span>
+                Session: <span className="text-red-500">{user.sessionName}</span>
               </p>
             </div>
 
@@ -141,7 +141,7 @@ const ConfidentialEvaluationsData = () => {
               }`}
             >
               {reportLoading ? <Loader2 className="animate-spin" size={18} /> : <FileText size={18} />}
-              {reportLoading ? "Generating..." : "Email Report to Admin"}
+              {reportLoading ? "Generating..." : "Submit all confidential Evaluations"} 
             </button>
           </div>
         </div>

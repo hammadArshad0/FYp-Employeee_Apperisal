@@ -47,33 +47,44 @@ const ConfidentialEvaluationsForm = () => {
     try {
       setSubmitting(true);
 
-      // ── SIRF DEXIE ME SAVE — backend call nahi ──────────────────────────
+      // ── Step 1: Dexie records banao ─────────────────────────────────────
       const dexieRecords = Object.entries(answers).map(([qId, score]) => ({
-        studentId: String(user.id),
+        studentId:    String(user.id),
+        studentName:  user.name || '',
         enrollmentId: parseInt(course.EnrollmentId || course.enrollmentId),
-        questionId: parseInt(qId),
-        score: parseInt(score),
-        teacherId: String(course.TeacherId || course.teacherId || ''),
-        sessionId: String(course.SessionId || course.sessionId || ''),
-        courseCode: course.CourseCode || '',
-        courseTitle: course.CourseTitle || '',
-        teacherName: course.TeacherName || '',
-        sessionName: course.SessionName || user.sessionName || '',
-        questionText: questions.find(q => String(q.QuestionId) === String(qId))?.Text
-                   || questions.find(q => String(q.QuestionId) === String(qId))?.QuestionText
-                   || '',
+        questionId:   parseInt(qId),
+        score:        parseInt(score),
+        teacherId:    String(course.TeacherId || course.teacherId || ''),
+        teacherName:  course.TeacherName || '',
+        sessionId:    String(course.SessionId || course.sessionId || ''),
+        sessionName:  course.SessionName || user.sessionName || '',
+        courseCode:   course.CourseCode || '',
+        courseTitle:  course.CourseTitle || '',
+        questionText:
+          questions.find(q => String(q.QuestionId) === String(qId))?.Text ||
+          questions.find(q => String(q.QuestionId) === String(qId))?.QuestionText ||
+          '',
         submittedAt: new Date().toISOString()
       }));
 
+      // ── Step 2: Dexie mein save karo ────────────────────────────────────
       await db.evaluations.bulkPut(dexieRecords);
       console.log("Dexie me save ho gaya:", dexieRecords);
+
+      // ── Step 3: Sirf is course ka data email karo ───────────────────────
+      await DataService.post(
+        `/Confidential/GenerateAndEmailReport/${user.id}`,
+        { evaluations: dexieRecords }
+      );
+      console.log("Email chali gayi!");
 
       alert("Submitted Successfully!");
       navigate('/student/confidential-evaluation');
 
     } catch (err) {
       console.error("Submission error:", err);
-      alert("Submission Failed.");
+      alert("Submitted! (Email issue ho sakti hai)");
+      navigate('/student/confidential-evaluation');
     } finally {
       setSubmitting(false);
     }
