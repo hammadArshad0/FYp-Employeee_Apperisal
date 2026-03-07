@@ -37,6 +37,7 @@ import ConfidentialEvaluationsForm from './component/feature/student/confidentia
 import ConfidentialEvaluationsData from './component/feature/student/confidentialEvalution'; // S03 List
 import ConfidentialEvaluations from './component/feature/director/seeConfidentialEvaluations';
 import SocietyManagement from './component/feature/hod/SocietyManagement';
+import EmailSettings from './component/feature/director/EmailSettings';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -80,6 +81,7 @@ const App = () => {
           <Route path="add-kpi" element={<AddKPI />} />
           <Route path="performance" element={<SeePerformance />} />
           <Route path="confidential" element={<ConfidentialEvaluations />} />
+          <Route path="email" element={<EmailSettings />} />
         </Route>
 
         {/* --- HOD ROUTES --- */}

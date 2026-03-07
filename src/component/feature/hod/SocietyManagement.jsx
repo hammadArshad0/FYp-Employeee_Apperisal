@@ -1,195 +1,187 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, Users, GraduationCap, Plus, 
-  Trash2, Edit3, Save, LayoutDashboard, 
-  CheckCircle2, UserCheck
+  Trash2, LayoutDashboard, CheckCircle2, UserCheck
 } from 'lucide-react';
+import DataService from '../../../services/axios';
 
 const SocietyManagement = () => {
   // --- STATES ---
-  const [societies, setSocieties] = useState([
-    { id: 1, name: "Programming Society", desc: "Coding & Tech Competitions" },
-    { id: 2, name: "Robotics Society", desc: "Hardware & AI Projects" }
-  ]);
-
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [societies, setSocieties] = useState([]);
   const [mentors, setMentors] = useState([]);
   const [chairpersons, setChairpersons] = useState([]);
 
   // Form Inputs States
   const [newSoc, setNewSoc] = useState({ name: '', desc: '' });
   const [mentorSelection, setMentorSelection] = useState({ socId: '', teacherId: '' });
-  const [chairSelection, setChairSelection] = useState({ socId: '', studentId: '' });
+  const [chairSelection, setChairSelection] = useState({ socId: '', teacherId: '' });
 
-  // Dummy Master Data
-  const teachers = [
-    { id: "T01", name: "Dr. Ahmed Khan", dept: "CS" },
-    { id: "T02", name: "Ms. Sarah Ali", dept: "IT" },
-    { id: "T03", name: "Mr. Hassan Raza", dept: "CS" }
-  ];
+  // --- FETCH DATA ON LOAD ---
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        setLoading(true);
+        const tRes = await DataService.get('/teacher/Teacherlist');
+        setTeachers(tRes.data);
+        
+        // فرض کریں آپ کے پاس سوسائٹیز لانے کی بھی API ہے
+        // const sRes = await DataService.get('/society/list');
+        // setSocieties(sRes.data);
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Fetch Error:", error);
+        setLoading(false);
+      }
+    };
+    initData();
+  }, []);
 
-  const students = [
-    { id: "S01", name: "Ali Hamza", reg: "2021-AR-123" },
-    { id: "S02", name: "Ayesha Bibi", reg: "2021-AR-144" },
-    { id: "S03", name: "Bilal Malik", reg: "2021-AR-901" }
-  ];
-
-  // --- FUNCTIONS ---
-
-  // 1. Add Society
-  const handleAddSociety = () => {
+  // --- 1. ADD SOCIETY ---
+  const handleAddSociety = async () => {
     if (!newSoc.name) return alert("Please enter society name");
-    const addedSoc = { ...newSoc, id: Date.now() };
-    setSocieties([...societies, addedSoc]);
-    setNewSoc({ name: '', desc: '' });
-  };
-
-  // 2. Add Mentor
-  const handleAddMentor = () => {
-    if (!mentorSelection.socId || !mentorSelection.teacherId) return alert("Select both Society and Teacher");
-    const socName = societies.find(s => s.id === parseInt(mentorSelection.socId))?.name;
-    const teacherName = teachers.find(t => t.id === mentorSelection.teacherId)?.name;
     
-    const newEntry = { id: Date.now(), socName, teacherName };
-    setMentors([...mentors, newEntry]);
+    try {
+      // API Call (Backend server par save karne ke liye)
+      // await DataService.post('/society/add', newSoc);
+      
+      const addedSoc = { ...newSoc, id: Date.now() };
+      setSocieties([...societies, addedSoc]);
+      setNewSoc({ name: '', desc: '' });
+      alert("Society added successfully!");
+    } catch (err) {
+      alert("Failed to add society");
+    }
   };
 
-  // 3. Add Chairperson
+  // --- 2. ADD MENTOR (Teacher) ---
+  const handleAddMentor = async () => {
+    if (!mentorSelection.socId || !mentorSelection.teacherId) return alert("Select Society and Teacher");
+    
+    const soc = societies.find(s => s.id.toString() === mentorSelection.socId);
+    const teacher = teachers.find(t => t.UserID === mentorSelection.teacherId);
+    
+    if (soc && teacher) {
+      const newMentor = { id: Date.now(), socName: soc.name, teacherName: teacher.Name };
+      setMentors([...mentors, newMentor]);
+      alert(`Mentor ${teacher.Name} assigned to ${soc.name}`);
+    }
+  };
+
+  // --- 3. ADD CHAIRPERSON (Teacher - as requested) ---
   const handleAddChair = () => {
-    if (!chairSelection.socId || !chairSelection.studentId) return alert("Select both Society and Student");
-    const socName = societies.find(s => s.id === parseInt(chairSelection.socId))?.name;
-    const studentName = students.find(s => s.id === chairSelection.studentId)?.name;
+    if (!chairSelection.socId || !chairSelection.teacherId) return alert("Select Society and Teacher for Chairperson");
     
-    const newEntry = { id: Date.now(), socName, studentName };
-    setChairpersons([...chairpersons, newEntry]);
+    const soc = societies.find(s => s.id.toString() === chairSelection.socId);
+    const teacher = teachers.find(t => t.UserID === chairSelection.teacherId);
+    
+    if (soc && teacher) {
+      const newChair = { id: Date.now(), socName: soc.name, teacherName: teacher.Name };
+      setChairpersons([...chairpersons, newChair]);
+      alert(`Chairperson ${teacher.Name} assigned to ${soc.name}`);
+    }
   };
 
-  // 4. Delete Functions
+  // --- 4. DELETE FUNCTIONS ---
   const deleteSociety = (id) => setSocieties(societies.filter(s => s.id !== id));
   const deleteMentor = (id) => setMentors(mentors.filter(m => m.id !== id));
   const deleteChair = (id) => setChairpersons(chairpersons.filter(c => c.id !== id));
 
   return (
-    <div className="min-h-screen bg-[#f4f7fe] p-4 md:p-10 font-sans">
+    <div className="min-h-screen bg-[#f4f7fe] p-10">
       
       {/* HEADER */}
-      <div className="max-w-[1600px] mx-auto mb-8 bg-white p-6 rounded-[2rem] shadow-sm flex items-center gap-4 border border-slate-100">
+      <div className="max-w-[1600px] mx-auto mb-8 bg-white p-6 rounded-[2rem] shadow-sm flex items-center gap-4">
         <div className="bg-green-700 p-3 rounded-2xl text-white shadow-lg"><LayoutDashboard size={28} /></div>
-        <div>
-          <h1 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter leading-none">Society Management Portal</h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Admin Dashboard / Fall 2025</p>
-        </div>
+        <h1 className="text-2xl font-black text-slate-800 uppercase italic">Society Management Portal</h1>
       </div>
 
       <div className="max-w-[1600px] mx-auto grid grid-cols-12 gap-8">
         
-        {/* --- SECTION 1: ADD SOCIETY --- */}
-        <div className="col-span-12 lg:col-span-4 space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 transition-all hover:shadow-md">
-            <h2 className="text-lg font-black text-slate-800 uppercase italic mb-6 flex items-center gap-2"><Building2 className="text-green-700" size={20}/> 1. Create Society</h2>
-            <div className="space-y-4">
-              <input value={newSoc.name} onChange={(e) => setNewSoc({...newSoc, name: e.target.value})} type="text" placeholder="Society Name" className="w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-green-200" />
-              <textarea value={newSoc.desc} onChange={(e) => setNewSoc({...newSoc, desc: e.target.value})} placeholder="Description..." className="w-full bg-slate-50 border-none rounded-xl p-4 text-sm font-bold outline-none h-20 resize-none focus:ring-2 focus:ring-green-200"></textarea>
-              <button onClick={handleAddSociety} className="w-full bg-green-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-900 transition-all uppercase text-[10px] tracking-widest shadow-lg">
-                <Plus size={16}/> Save Society
-              </button>
-            </div>
+        {/* 1. CREATE SOCIETY */}
+        <div className="col-span-12 lg:col-span-4 bg-white p-8 rounded-[2.5rem] shadow-sm">
+          <h2 className="text-lg font-black text-slate-800 uppercase italic mb-6 flex items-center gap-2"><Building2 className="text-green-700" size={20}/> 1. Create Society</h2>
+          <input value={newSoc.name} onChange={(e) => setNewSoc({...newSoc, name: e.target.value})} type="text" placeholder="Society Name" className="w-full bg-slate-50 border-none rounded-xl p-4 mb-4 font-bold outline-none" />
+          <textarea value={newSoc.desc} onChange={(e) => setNewSoc({...newSoc, desc: e.target.value})} placeholder="Description" className="w-full bg-slate-50 border-none rounded-xl p-4 mb-4 h-20 outline-none"></textarea>
+          <button onClick={handleAddSociety} className="w-full bg-green-700 text-white font-black py-4 rounded-xl shadow-lg uppercase text-[10px] tracking-widest hover:bg-green-800 transition-all">
+            <Plus size={16} className="inline mr-2"/> Save Society
+          </button>
 
-            <div className="mt-8">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Society Directory</h3>
-              <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                {societies.map(s => (
-                  <div key={s.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group border border-transparent hover:border-green-100 transition-all">
-                    <div className="truncate pr-4">
-                      <p className="text-xs font-black text-slate-800 uppercase italic tracking-tighter">{s.name}</p>
-                      <p className="text-[9px] text-slate-400 font-bold uppercase truncate">{s.desc}</p>
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                      <button onClick={() => deleteSociety(s.id)} className="p-2 text-slate-400 hover:text-red-500"><Trash2 size={14}/></button>
-                    </div>
-                  </div>
-                ))}
+          {/* List of Societies */}
+          <div className="mt-6 space-y-2">
+            {societies.map(s => (
+             <div key={s.id} className="p-3 bg-slate-50 rounded-xl flex justify-between">
+                <div>
+                  <p className="text-[10px] font-black">{s.name}</p>
+                  <p className="text-[8px] text-green-700 uppercase font-bold">{s.desc}</p>
+                </div>
+                <button onClick={() => deleteSociety(s.id)} className="text-red-500"><Trash2 size={14}/></button>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* --- SECTION 2: ASSIGN MENTORS --- */}
-        <div className="col-span-12 lg:col-span-4 space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 transition-all hover:shadow-md">
-            <h2 className="text-lg font-black text-slate-800 uppercase italic mb-6 flex items-center gap-2"><Users className="text-green-700" size={20}/> 2. Assign Mentors</h2>
-            <div className="space-y-4">
-              <select onChange={(e) => setMentorSelection({...mentorSelection, socId: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl p-4 text-xs font-black outline-none cursor-pointer">
-                <option value="">Select Society</option>
-                {societies.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              <select onChange={(e) => setMentorSelection({...mentorSelection, teacherId: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl p-4 text-xs font-black outline-none cursor-pointer">
-                <option value="">Select Teacher</option>
-                {teachers.map(t => <option key={t.id} value={t.id}>{t.name} ({t.dept})</option>)}
-              </select>
-              <button onClick={handleAddMentor} className="w-full bg-slate-900 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 transition-all uppercase text-[10px] tracking-widest shadow-lg">
-                <UserCheck size={16}/> Confirm Mentor
-              </button>
-            </div>
+        {/* 2. ASSIGN MENTORS */}
+        <div className="col-span-12 lg:col-span-4 bg-white p-8 rounded-[2.5rem] shadow-sm">
+          <h2 className="text-lg font-black text-slate-800 uppercase italic mb-6 flex items-center gap-2"><Users className="text-green-700" size={20}/> 2. Mentors</h2>
+          <select value={mentorSelection.socId} onChange={(e) => setMentorSelection({...mentorSelection, socId: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl p-4 mb-4 font-black outline-none">
+            <option value="">Select Society</option>
+            {societies.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+          <select value={mentorSelection.teacherId} onChange={(e) => setMentorSelection({...mentorSelection, teacherId: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl p-4 mb-4 font-black outline-none">
+            <option value="">{loading ? "Loading..." : "Select Teacher"}</option>
+            {teachers.map(t => <option key={t.UserID} value={t.UserID}>{t.Name}</option>)}
+          </select>
+          <button onClick={handleAddMentor} className="w-full bg-slate-800 text-white font-black py-4 rounded-xl shadow-lg uppercase text-[10px] tracking-widest hover:bg-black transition-all">
+            <UserCheck size={16} className="inline mr-2"/> Confirm Mentor
+          </button>
 
-            <div className="mt-8">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Assigned Mentors</h3>
-              <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                {mentors.length === 0 && <p className="text-[10px] text-slate-300 font-bold text-center py-4 italic uppercase tracking-widest">No mentors assigned yet</p>}
-                {mentors.map(m => (
-                  <div key={m.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group border border-transparent hover:border-green-100 transition-all">
-                    <div>
-                      <p className="text-xs font-black text-slate-800 uppercase italic tracking-tighter">{m.teacherName}</p>
-                      <p className="text-[9px] text-green-700 font-black uppercase tracking-widest">{m.socName}</p>
-                    </div>
-                    <button onClick={() => deleteMentor(m.id)} className="p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={14}/></button>
-                  </div>
-                ))}
+          {/* Mentor List */}
+          <div className="mt-6 space-y-2">
+            {mentors.map(m => (
+              <div key={m.id} className="p-3 bg-slate-50 rounded-xl flex justify-between">
+                <div>
+                  <p className="text-[10px] font-black">{m.teacherName}</p>
+                  <p className="text-[8px] text-green-700 uppercase font-bold">{m.socName}</p>
+                </div>
+                <button onClick={() => deleteMentor(m.id)} className="text-red-400"><Trash2 size={14}/></button>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* --- SECTION 3: ASSIGN CHAIRPERSONS --- */}
-        <div className="col-span-12 lg:col-span-4 space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 transition-all hover:shadow-md">
-            <h2 className="text-lg font-black text-slate-800 uppercase italic mb-6 flex items-center gap-2"><GraduationCap className="text-green-700" size={20}/> 3. Chairpersons</h2>
-            <div className="space-y-4">
-              <select onChange={(e) => setChairSelection({...chairSelection, socId: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl p-4 text-xs font-black outline-none cursor-pointer">
-                <option value="">Select Society</option>
-                {societies.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              <select onChange={(e) => setChairSelection({...chairSelection, studentId: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl p-4 text-xs font-black outline-none cursor-pointer">
-                <option value="">Select Student</option>
-                {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.reg})</option>)}
-              </select>
-              <button onClick={handleAddChair} className="w-full bg-green-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-900 transition-all uppercase text-[10px] tracking-widest shadow-lg">
-                <CheckCircle2 size={16}/> Assign Leadership
-              </button>
-            </div>
+        {/* 3. ASSIGN CHAIRPERSONS (Teacher) */}
+        <div className="col-span-12 lg:col-span-4 bg-white p-8 rounded-[2.5rem] shadow-sm">
+          <h2 className="text-lg font-black text-slate-800 uppercase italic mb-6 flex items-center gap-2"><GraduationCap className="text-green-700" size={20}/> 3. Chairpersons</h2>
+          <select value={chairSelection.socId} onChange={(e) => setChairSelection({...chairSelection, socId: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl p-4 mb-4 font-black outline-none">
+            <option value="">Select Society</option>
+            {societies.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+          <select value={chairSelection.teacherId} onChange={(e) => setChairSelection({...chairSelection, teacherId: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl p-4 mb-4 font-black outline-none">
+            <option value="">Select Teacher (Chairperson)</option>
+            {teachers.map(t => <option key={t.UserID} value={t.UserID}>{t.Name}</option>)}
+          </select>
+          <button onClick={handleAddChair} className="w-full bg-green-700 text-white font-black py-4 rounded-xl shadow-lg uppercase text-[10px] tracking-widest">
+            <CheckCircle2 size={16} className="inline mr-2"/> Assign Chair
+          </button>
 
-            <div className="mt-8">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Leadership List</h3>
-              <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                {chairpersons.length === 0 && <p className="text-[10px] text-slate-300 font-bold text-center py-4 italic uppercase tracking-widest">No leaders assigned yet</p>}
-                {chairpersons.map(c => (
-                  <div key={c.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group border border-transparent hover:border-green-100 transition-all">
-                    <div>
-                      <p className="text-xs font-black text-slate-800 uppercase italic tracking-tighter">{c.studentName}</p>
-                      <p className="text-[9px] text-green-700 font-black uppercase tracking-widest">{c.socName}</p>
-                    </div>
-                    <button onClick={() => deleteChair(c.id)} className="p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={14}/></button>
-                  </div>
-                ))}
+          {/* Chair List */}
+          <div className="mt-6 space-y-2">
+            {chairpersons.map(c => (
+              <div key={c.id} className="p-4 bg-green-50 rounded-2xl flex justify-between border border-green-100">
+                <div>
+                  <p className="text-xs font-black text-slate-800 uppercase italic">{c.teacherName}</p>
+                  <p className="text-[9px] text-green-700 font-bold uppercase">{c.socName}</p>
+                </div>
+                <button onClick={() => deleteChair(c.id)} className="text-red-400"><Trash2 size={14}/></button>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
       </div>
-
-      <footer className="max-w-7xl mx-auto mt-12 text-center opacity-30">
-        <p className="text-[9px] font-black uppercase tracking-[0.5em] italic">SMO Unified Resource Management • Arid University Rawalpindi</p>
-      </footer>
     </div>
   );
 };
