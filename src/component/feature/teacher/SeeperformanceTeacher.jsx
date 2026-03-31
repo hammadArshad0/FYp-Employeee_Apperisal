@@ -9,7 +9,6 @@ const SeePerformanceTeacher = () => {
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState([]);
   
-  // Login Session Priority
   const loginSessionId = localStorage.getItem('sessionId');
   const [selectedSession, setSelectedSession] = useState(loginSessionId || '');
   
@@ -19,14 +18,12 @@ const SeePerformanceTeacher = () => {
 
   const teacherId = localStorage.getItem('userId');
 
-  // Load Sessions
   useEffect(() => {
     const fetchSessions = async () => {
       try {
         const res = await DataService.get('/Session/list');
         const sessionList = res.data || [];
         setSessions(sessionList);
-        
         if (!selectedSession && sessionList.length > 0) {
           setSelectedSession(sessionList[0].id || sessionList[0].Id);
         }
@@ -37,7 +34,6 @@ const SeePerformanceTeacher = () => {
     fetchSessions();
   }, []);
 
-  // Fetch Performance
   useEffect(() => {
     if (!selectedSession) return;
 
@@ -73,14 +69,16 @@ const SeePerformanceTeacher = () => {
             if (isConf && dexieRecords.length > 0) {
               kpiPoints += (currentDexieAvg / 4.0) * sub.SubMax;
             } else {
-              kpiPoints += sub.SubAchieved;
+              // ✅ FIX: SubAchieved ko SubMax se zyada mat hone do
+              kpiPoints += Math.min(sub.SubAchieved, sub.SubMax);
             }
           });
-          kpi.KPIAchieved = kpiPoints;
-          totalEarned += kpiPoints;
+          // ✅ FIX: KPI points bhi KPIWeight se zyada nahi hone chahiye
+          kpi.KPIAchieved = Math.min(kpiPoints, kpi.KPIWeight);
+          totalEarned += kpi.KPIAchieved;
         });
 
-        setFinalOverall(totalMax > 0 ? Math.round((totalEarned / totalMax) * 100) : 0);
+        setFinalOverall(totalMax > 0 ? Math.min(100, Math.round((totalEarned / totalMax) * 100)) : 0);
         setData(backendData);
       } catch (err) {
         console.error("Error:", err);
@@ -92,16 +90,25 @@ const SeePerformanceTeacher = () => {
     fetchPerformanceData();
   }, [selectedSession, teacherId]);
 
+  // ✅ FIX: performance kabhi 100 se zyada nahi jayegi
   const getGraphData = () => {
     if (!data) return [];
     return data.Breakdown.flatMap(kpi => 
-      kpi.SubDetails.map(sub => ({
-        name: sub.SubName,
-        performance: (sub.SubName.toLowerCase().includes('confidential') && hasDexieData) 
-          ? Math.round((dexieConfAvg / 4.0) * 100)
-          : Math.round((sub.SubAchieved / sub.SubMax) * 100) || 0,
-        isConf: sub.SubName.toLowerCase().includes('confidential') && hasDexieData
-      }))
+      kpi.SubDetails.map(sub => {
+        let performance;
+        if (sub.SubName.toLowerCase().includes('confidential') && hasDexieData) {
+          performance = Math.round((dexieConfAvg / 4.0) * 100);
+        } else {
+          performance = Math.round((Math.min(sub.SubAchieved, sub.SubMax) / sub.SubMax) * 100) || 0;
+        }
+        // ✅ Hard clamp
+        performance = Math.min(100, Math.max(0, performance));
+        return {
+          name: sub.SubName,
+          performance,
+          isConf: sub.SubName.toLowerCase().includes('confidential') && hasDexieData
+        };
+      })
     );
   };
 
@@ -120,7 +127,6 @@ const SeePerformanceTeacher = () => {
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">View historical performance</p>
             </div>
           </div>
-          
           <select 
             value={selectedSession} 
             onChange={(e) => setSelectedSession(e.target.value)}
@@ -143,9 +149,9 @@ const SeePerformanceTeacher = () => {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             
             {/* SCOREBOARD */}
-            <div className="bg-green-900 p-8 md:p-12 rounded-[3.5rem] text-white flex flex-col md:flex-row justify-between items-center shadow-2xl relative overflow-hidden">
+            <div className="bg-green-900 p-8 md:p-8 rounded-[3.5rem] text-white flex flex-col md:flex-row justify-between items-center shadow-2xl relative overflow-hidden">
               <div className="relative z-10 text-center md:text-left">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
                    <TrendingUp size={20} className="text-green-400" />
                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-green-300">Academic Analytics</span>
                 </div>
@@ -154,17 +160,17 @@ const SeePerformanceTeacher = () => {
                 {hasDexieData && (
                   <div className="mt-6 flex items-center justify-center md:justify-start gap-2 bg-white/10 px-4 py-2 rounded-full border border-white/10 w-fit backdrop-blur-md">
                     <ShieldCheck size={16} className="text-green-400" />
-                    <span className="text-[10px] font-black uppercase tracking-tighter">Verified by Director's Local Ratings</span>
+                    <span className="text-[10px] font-black uppercase tracking-tighter">See Overall Performance</span>
                   </div>
                 )}
               </div>
-              <div className="relative z-10 bg-white/5 p-10 rounded-[3rem] text-center min-w-[260px] border border-white/10 mt-8 md:mt-0 backdrop-blur-sm">
-                <p className="text-[11px] font-bold uppercase opacity-50 tracking-[0.3em] mb-2">Aggregate Score</p>
-                <p className="text-8xl font-black leading-none tracking-tighter">{finalOverall}%</p>
+              <div className="relative z-10 bg-white/5 p-6 rounded-[2rem] text-center min-w-[260px] border border-white/10 mt-8 md:mt-0 backdrop-blur-sm">
+                <p className="text-[12px] font-bold uppercase opacity-50 tracking-[0.2em] mb-2">Average Score</p>
+                <p className="text-5xl font-black leading-none tracking-tighter">{finalOverall}%</p>
               </div>
             </div>
 
-            {/* GRAPH - Same as Director Design */}
+            {/* GRAPH */}
             <div className="bg-white p-6 md:p-10 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 relative z-10">
                 <div className="flex items-center gap-4">
@@ -227,14 +233,13 @@ const SeePerformanceTeacher = () => {
             </div>
 
             {/* KPI CARDS */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {data?.Breakdown.map((kpi, idx) => {
-                const perc = Math.round((kpi.KPIAchieved / kpi.KPIWeight) * 100) || 0;
+                const perc = Math.min(100, Math.round((kpi.KPIAchieved / kpi.KPIWeight) * 100) || 0);
                 let cardColor = "text-red-700"; let progressColor = "bg-red-700";
                 if (perc >= 80) { cardColor = "text-green-700"; progressColor = "bg-green-700"; }
                 else if (perc >= 60) { cardColor = "text-amber-600"; progressColor = "bg-amber-600"; }
                 else if (perc >= 40) { cardColor = "text-orange-600"; progressColor = "bg-orange-600"; }
-
                 return (
                   <div key={idx} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
                     <div className="flex justify-between items-start mb-8">
@@ -243,7 +248,7 @@ const SeePerformanceTeacher = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Max Weight</p>
-                        <p className="text-2xl font-black text-slate-800">{kpi.KPIWeight}</p>
+                        <p className="text-2xl font-black text-slate-800">{kpi.KPIWeight}%</p>
                       </div>
                     </div>
                     <h4 className="text-xl font-black text-slate-700 uppercase italic tracking-tighter mb-1">{kpi.KPIName}</h4>
@@ -255,6 +260,66 @@ const SeePerformanceTeacher = () => {
                 );
               })}
             </div>
+
+            {/* ✅ NEW: SUB KPI BREAKDOWN CARDS */}
+            <div className="space-y-4 pb-10">
+              <h3 className="text-xl font-black text-slate-700 uppercase italic tracking-tighter px-2">
+                Sub KPI Breakdown
+              </h3>
+              {data.Breakdown.flatMap((kpi) =>
+                kpi.SubDetails.map((sub, idx) => {
+                  const isConf = sub.SubName.toLowerCase().includes('confidential');
+
+                  const achieved = (isConf && hasDexieData)
+                    ? Math.round((dexieConfAvg / 4.0) * sub.SubMax)
+                    : Math.min(sub.SubAchieved, sub.SubMax);
+
+                  const finalPerc = Math.min(100, Math.round((achieved / sub.SubMax) * 100) || 0);
+
+                  let finalBarColor = "bg-red-500";
+                  let finalTextColor = "text-red-600";
+                  if (finalPerc >= 80) { finalBarColor = "bg-green-600"; finalTextColor = "text-green-700"; }
+                  else if (finalPerc >= 60) { finalBarColor = "bg-amber-500"; finalTextColor = "text-amber-600"; }
+                  else if (finalPerc >= 40) { finalBarColor = "bg-orange-500"; finalTextColor = "text-orange-600"; }
+
+                  return (
+                    <div key={`${kpi.KPIName}-${idx}`} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex items-center gap-6">
+                      {/* Left: Names + Progress Bar */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                          {kpi.KPIName}
+                        </p>
+                        <h4 className="text-lg font-black text-slate-800 uppercase italic tracking-tighter truncate">
+                          {sub.SubName}
+                          {isConf && hasDexieData && (
+                            <span className="ml-2 text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-black normal-case not-italic">
+                              Local Data
+                            </span>
+                          )}
+                        </h4>
+                        <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner mt-3">
+                          <div
+                            className={`h-full ${finalBarColor} transition-all duration-1000`}
+                            style={{ width: `${finalPerc}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right: Score */}
+                      <div className="text-right shrink-0">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Score</p>
+                        <p className={`text-3xl font-black ${finalTextColor}`}>
+                          {achieved}
+                          <span className="text-base text-slate-400 font-bold"> / {sub.SubMax}</span>
+                        </p>
+                        <p className={`text-[11px] font-black uppercase ${finalTextColor}`}>{finalPerc}%</p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
           </div>
         ) : (
           <div className="bg-white p-20 rounded-[3.5rem] text-center border border-slate-100 shadow-sm">

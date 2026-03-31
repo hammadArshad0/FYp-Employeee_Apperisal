@@ -38,6 +38,7 @@ import ConfidentialEvaluationsData from './component/feature/student/confidentia
 import ConfidentialEvaluations from './component/feature/director/seeConfidentialEvaluations';
 import SocietyManagement from './component/feature/hod/SocietyManagement';
 import EmailSettings from './component/feature/director/EmailSettings';
+import FilterPerformance from './component/feature/director/FilterPerformance';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -82,6 +83,7 @@ const App = () => {
           <Route path="performance" element={<SeePerformance />} />
           <Route path="confidential" element={<ConfidentialEvaluations />} />
           <Route path="email" element={<EmailSettings />} />
+          <Route path="filter-performance" element={<FilterPerformance />} />
         </Route>
 
         {/* --- HOD ROUTES --- */}

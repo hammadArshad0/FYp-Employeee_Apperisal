@@ -1,135 +1,141 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Save, Loader2, BookOpen } from 'lucide-react';
+import DataService from '../../services/axios';
 
 const EvaluationModal = ({ isOpen, onClose, teacherData }) => {
-  // Har course ke liye individual states maintain karne ke liye
-  const [evaluations, setEvaluations] = useState({});
+  const [evaluations, setEvaluations] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && teacherData && teacherData.EnrolledCourses) {
+      const initialEvals = teacherData.EnrolledCourses.map(course => ({
+        courseCode: course.Code || course.Id,
+        courseName: course.Course,
+        paperStatus: 'on-time', 
+        folderStatus: 'on-time'
+      }));
+      setEvaluations(initialEvals);
+    }
+  }, [teacherData, isOpen]);
 
   if (!isOpen || !teacherData) return null;
 
-  const handleSelection = (courseId, type, value) => {
-    setEvaluations(prev => ({
-      ...prev,
-      [courseId]: {
-        ...prev[courseId],
-        [type]: value
-      }
-    }));
+  const handleStatusChange = (index, field, value) => {
+    const updated = [...evaluations];
+    updated[index][field] = value;
+    setEvaluations(updated);
   };
 
-  const handleComment = (courseId, comment) => {
-    setEvaluations(prev => ({
-      ...prev,
-      [courseId]: {
-        ...prev[courseId],
-        comment: comment
-      }
-    }));
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    // Yahan payload ko Backend DTO (EvaluationRequestDTO) ke mutabiq format kiya hai
+    const payload = {
+      TeacherID: teacherData.TeacherID,
+      SessionID: parseInt(localStorage.getItem('sessionId')) || 1, // Dynamic Session ID
+      HODID: localStorage.getItem('userId') || "HOD-01", 
+      Evaluations: evaluations.map(e => ({
+        CourseCode: e.courseCode,
+        PaperStatus: e.paperStatus, // "on-time" ya "late"
+        FolderStatus: e.folderStatus
+      }))
+    };
+
+    try {
+      // Backend Route: /api/CourseManagement/SaveEvaluation
+      const res = await DataService.post('/CourseManagement/SaveEvaluation', payload);
+      alert(res.data.message || "Evaluation Saved Successfully!");
+      onClose();
+    } catch (err) {
+      console.error("Save Error:", err);
+      const serverError = err.response?.data?.Message || "Server connection failed";
+      alert("Failed: " + serverError);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-2xl font-bold text-green-700 italic">
-            Evaluate {teacherData.teacher}
-          </h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <X size={24} className="text-gray-500" />
+        {/* Header */}
+        <div className="bg-gradient-to-r from-green-800 to-green-600 p-6 text-white flex justify-between items-center shadow-lg">
+          <div className="flex items-center gap-4">
+            <div className="bg-white/20 p-3 rounded-2xl">
+               <BookOpen size={28} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black leading-tight">{teacherData.TeacherName}</h2>
+              <p className="text-green-100 text-xs font-bold uppercase tracking-widest">
+                Evaluation for {evaluations.length} Courses
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="bg-black/10 hover:bg-black/20 p-2 rounded-full transition-all">
+            <X size={20} />
           </button>
         </div>
 
-        {/* Modal Body - Scrollable */}
-        <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
-          {teacherData.enrolledCourses.map((course) => (
-            <div key={course.id} className="border border-green-100 rounded-2xl p-5 space-y-4">
-              <h3 className="font-bold text-gray-800 uppercase tracking-tight">
-                {course.course} ({course.code})
-              </h3>
-
-              {/* Paper Submission Toggle */}
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-600 italic">Paper Submission on Time</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => handleSelection(course.id, 'paper', 'on-time')}
-                    className={`py-2.5 rounded-xl border-2 font-bold transition-all ${
-                      evaluations[course.id]?.paper === 'on-time'
-                        ? 'bg-green-50 border-green-500 text-green-700'
-                        : 'border-gray-100 text-gray-400'
-                    }`}
-                  >
-                    Yes (On Time)
-                  </button>
-                  <button
-                    onClick={() => handleSelection(course.id, 'paper', 'late')}
-                    className={`py-2.5 rounded-xl border-2 font-bold transition-all ${
-                      evaluations[course.id]?.paper === 'late'
-                        ? 'bg-red-50 border-red-500 text-red-700'
-                        : 'border-gray-100 text-gray-400'
-                    }`}
-                  >
-                    No (Late)
-                  </button>
-                </div>
+        {/* Body */}
+        <div className="p-6 overflow-y-auto bg-gray-50 flex-1">
+          {evaluations.length === 0 && <p className="text-center text-gray-400 py-10">No courses found for evaluation.</p>}
+          
+          {evaluations.map((evalItem, index) => (
+            <div key={index} className="mb-6 bg-white border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="bg-green-600 text-white text-[10px] font-black px-2 py-1 rounded-lg">
+                  {evalItem.courseCode}
+                </span>
+                <h4 className="font-bold text-gray-800">{evalItem.courseName}</h4>
               </div>
 
-              {/* Folder Submission Toggle */}
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-600 italic">Folder Submission on Time</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => handleSelection(course.id, 'folder', 'on-time')}
-                    className={`py-2.5 rounded-xl border-2 font-bold transition-all ${
-                      evaluations[course.id]?.folder === 'on-time'
-                        ? 'bg-green-50 border-green-500 text-green-700'
-                        : 'border-gray-100 text-gray-400'
-                    }`}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Paper Status */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Paper Submission</label>
+                  <select 
+                    value={evalItem.paperStatus}
+                    onChange={(e) => handleStatusChange(index, 'paperStatus', e.target.value)}
+                    className="w-full p-3 rounded-xl border-2 border-gray-100 font-bold text-gray-700 focus:border-green-500 outline-none cursor-pointer"
                   >
-                    Yes (On Time)
-                  </button>
-                  <button
-                    onClick={() => handleSelection(course.id, 'folder', 'late')}
-                    className={`py-2.5 rounded-xl border-2 font-bold transition-all ${
-                      evaluations[course.id]?.folder === 'late'
-                        ? 'bg-red-50 border-red-500 text-red-700'
-                        : 'border-gray-100 text-gray-400'
-                    }`}
+                    <option value="on-time">✅ On Time</option>
+                    <option value="late">❌ Late</option>
+                  </select>
+                </div>
+
+                {/* Folder Status */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Folder Submission</label>
+                  <select 
+                    value={evalItem.folderStatus}
+                    onChange={(e) => handleStatusChange(index, 'folderStatus', e.target.value)}
+                    className="w-full p-3 rounded-xl border-2 border-gray-100 font-bold text-gray-700 focus:border-green-500 outline-none cursor-pointer"
                   >
-                    No (Late)
-                  </button>
+                    <option value="on-time">✅ On Time</option>
+                    <option value="late">❌ Late</option>
+                  </select>
                 </div>
               </div>
-
-              {/* Comment Input */}
-              <input
-                type="text"
-                placeholder="Write any comments..."
-                onChange={(e) => handleComment(course.id, e.target.value)}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none focus:ring-2 ring-green-500 transition-all text-sm"
-              />
             </div>
           ))}
         </div>
 
-        {/* Modal Footer */}
-        <div className="p-6 border-t border-gray-100 flex gap-4">
-          <button 
-            onClick={onClose}
-            className="flex-1 py-3 text-gray-600 font-bold hover:bg-gray-50 rounded-xl transition-all"
-          >
+        {/* Footer */}
+        <div className="p-6 border-t bg-white flex gap-3">
+          <button onClick={onClose} className="px-6 py-3 font-bold text-gray-400 hover:text-gray-600">
             Cancel
           </button>
           <button 
-            onClick={() => {
-                console.log("Evaluation Data:", evaluations);
-                onClose();
-            }}
-            className="flex-1 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 shadow-lg shadow-green-100 active:scale-95 transition-all"
+            onClick={handleSave} 
+            disabled={isSaving || evaluations.length === 0}
+            className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 shadow-lg transition-all"
           >
-            Save Evaluation
+            {isSaving ? (
+              <><Loader2 className="animate-spin" size={20} /> Saving...</>
+            ) : (
+              <><Save size={20} /> Submit Evaluation</>
+            )}
           </button>
         </div>
       </div>
