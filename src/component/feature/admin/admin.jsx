@@ -98,7 +98,7 @@ const AdminUploadPanel = () => {
       addUploadedFile(file.name, "Teacher", "success", response.data || "Uploaded successfully");
     } catch (err) {
       console.error("Teacher Upload Error:", err);
-      alert(err.response?.data || "Error uploading teachers");
+      alert( err.response?.data?.message || err.response?.data|| "Error uploading teachers");
       addUploadedFile(file.name, "Teacher", "error", err.response?.data || "Upload failed");
     } finally {
       setLoadingTeacher(false);

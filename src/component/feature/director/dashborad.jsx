@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Users, Target, BarChart3, ShieldCheck, 
   ClipboardList, PlusCircle, Lock, GraduationCap,
-  ArrowRightCircle
+  ArrowRightCircle,
+  Settings
 } from 'lucide-react';
 
 const DirectorDashboard = () => {
@@ -47,6 +48,20 @@ const DirectorDashboard = () => {
       desc: "View sensitive evaluations", 
       icon: <Lock size={24} />, 
       path: "/director-dashboard/confidential",
+      color: "hover:border-green-600 hover:bg-green-50"
+    },
+     { 
+      title: "email Settings", 
+      desc: "View sensitive evaluations", 
+      icon: <Settings size={24} />, 
+      path: "/director-dashboard/email",
+      color: "hover:border-green-600 hover:bg-green-50"
+    },
+       { 
+      title: "Filter Performance", 
+      desc: "View sensitive evaluations", 
+      icon: <Settings size={24} />, 
+      path: "/director-dashboard/filter-performance",
       color: "hover:border-green-600 hover:bg-green-50"
     },
   ];

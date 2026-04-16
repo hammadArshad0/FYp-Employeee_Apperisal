@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Trash2, UserPlus, Users, Loader2, CheckCircle2, ShieldCheck, Star } from "lucide-react";
+import { Trash2, UserPlus, Users, Loader2, CheckCircle2, ShieldCheck, Star, Settings2 } from "lucide-react";
 import DataService from "../../../services/axios";
+import PermanentManagementModal from "../../modal/PermanentModal";
 
 const AddPeerEvaluator = () => {
   const [sessions, setSessions] = useState([]);
@@ -12,13 +13,16 @@ const AddPeerEvaluator = () => {
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const [sessRes, teachRes, permRes] = await Promise.all([
         DataService.get('peerevaluator/Sessions'),
         DataService.get('peerevaluator/Teachers'),
-        DataService.get('peerevaluator/PermanentTeachers')
+        DataService.get('peerevaluator/PermanentTeachers'),
+      
       ]);
       setSessions(sessRes.data);
       setTeachers(teachRes.data);
@@ -43,6 +47,13 @@ const AddPeerEvaluator = () => {
       setPeerEvaluators([]);
     } finally {
       setListLoading(false);
+    }
+  };
+  // --- REFRESH LOGIC FOR MODAL ---
+  const handleRefresh = () => {
+    fetchData();
+    if (selectedSession) {
+      fetchEvaluatorsBySession(selectedSession);
     }
   };
 
@@ -102,7 +113,13 @@ const AddPeerEvaluator = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6 min-h-screen font-sans bg-gray-50/30">
-      
+         <PermanentManagementModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        permanentTeachers={permanentTeachers}
+        allTeachers={teachers}
+        onRefresh={handleRefresh}
+      />
       {/* Header Section */}
       <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col lg:flex-row justify-between items-center gap-6">
         <div className="flex items-center gap-5">
@@ -110,11 +127,24 @@ const AddPeerEvaluator = () => {
             <Users className="text-white" size={32} />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-gray-800 tracking-tighter uppercase italic">Add Peer Access Control</h1>
-            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">HOD Management Portal</p>
+            <h1 className="text-3xl font-black text-gray-800 tracking-tighter uppercase italic">Add Peer Evaluation</h1>
+            {/* <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">HOD Management Portal</p> */}
           </div>
         </div>
-
+<button 
+  onClick={() => setIsModalOpen(true)}
+  disabled={loading} // Jab data fetch ho raha ho to disable rakhen
+  className={`w-full md:w-auto flex items-center justify-center gap-2 bg-black text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg active:scale-95 ${
+    loading ? 'opacity-50 cursor-not-allowed' : 'opacity-100'
+  }`}
+>
+  {loading ? (
+    <Loader2 size={18} className="animate-spin" />
+  ) : (
+    <Settings2 size={18} />
+  )}
+  Manage Permanent
+</button>
         <div className="w-full lg:w-96 space-y-2">
           <span className="text-[10px] font-black text-green-700 uppercase tracking-widest ml-1">Academic Session</span>
           <select 
@@ -155,7 +185,7 @@ const AddPeerEvaluator = () => {
         
         {/* Left: Faculty Selection */}
         <div className={`bg-white rounded-[3rem] p-8 shadow-sm border border-gray-100 transition-all ${!selectedSession ? 'grayscale opacity-50' : ''}`}>
-          <h2 className="font-black text-gray-800 uppercase text-xl mb-6 italic underline decoration-green-500 decoration-4">Add Faculty</h2>
+          <h2 className="font-black text-gray-800 uppercase text-xl mb-6 italic underline decoration-green-500 decoration-4">Add Peer Evaluator</h2>
 
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
             {teachers.map(t => {

@@ -36,10 +36,24 @@ const Dashboard = () => {
       color: "hover:border-emerald-600 hover:bg-emerald-50"
     },
     { 
-      title: "Management", 
+      title: " Course Management", 
       desc: "Manage courses & staff", 
       icon: <Settings size={24} />, 
       path: "/hod-dashboard/courses",
+      color: "hover:border-purple-600 hover:bg-purple-50"
+    },
+      { 
+      title: " CHR", 
+      desc: "Manage courses & staff", 
+      icon: <Settings size={24} />, 
+      path: "/hod-dashboard/chr",
+      color: "hover:border-purple-600 hover:bg-purple-50"
+    },
+      { 
+      title: "Society Management", 
+      desc: "Manage courses & staff", 
+      icon: <Settings size={24} />, 
+      path: "/hod-dashboard/societies",
       color: "hover:border-purple-600 hover:bg-purple-50"
     }
   ];

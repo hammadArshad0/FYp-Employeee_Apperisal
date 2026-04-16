@@ -3,6 +3,7 @@ import { Users, BarChart3, Loader2, Search, GraduationCap, ShieldCheck } from 'l
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import DataService from '../../../services/axios';
 import db from "../../../db";
+import { useNavigate } from "react-router-dom";
 
 function FilterPerformance() {
   const [sessions, setSessions] = useState([]);
@@ -14,6 +15,8 @@ function FilterPerformance() {
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedDept, setSelectedDept] = useState('All');
   const [selectedCourse, setSelectedCourse] = useState('All');
+
+    const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -141,10 +144,16 @@ function FilterPerformance() {
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
             <BarChart3 className="text-green-600" size={32} />
-            Director Analytics
+            Director See Performance
           </h1>
-          <p className="text-gray-500 font-medium">Monitoring Teacher Performance with Weighted Local Integration.</p>
+          <p className="text-gray-500 font-medium">Monitoring Teacher Performance with Kpi score.</p>
         </div>
+       <button
+      className="border border-black-2 text-black-2 px-4 py-2 rounded-full font-bold text-sm hover:bg-gray-100 transition-colors"
+     onClick={() => navigate("/director-dashboard/filter-performance/comparison")}
+    >
+      Open Comparison
+    </button>
       </div>
 
       {/* Filters Bar */}

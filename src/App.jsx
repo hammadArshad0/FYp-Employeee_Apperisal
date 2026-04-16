@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 // --- LAYOUTS ---
 import HODLayout from './component/common/hodLayout';
-import DirectorLayout from './component/common/directorLayout'; 
+import DirectorLayout from './component/common/directorLayout';
 import Teacherlayout from './component/common/teacherLayout';
 
 // --- PAGES & COMPONENTS ---
@@ -39,6 +39,7 @@ import ConfidentialEvaluations from './component/feature/director/seeConfidentia
 import SocietyManagement from './component/feature/hod/SocietyManagement';
 import EmailSettings from './component/feature/director/EmailSettings';
 import FilterPerformance from './component/feature/director/FilterPerformance';
+import ComparisonPage from './component/feature/director/Detailscomparison';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -54,13 +55,13 @@ const ProtectedRoute = ({ children, allowedRole }) => {
       Director: "/director-dashboard",
       HOD: "/hod-dashboard",
       Teacher: "/teacher-dashboard",
-      Student:  "/student-dashboard", 
+      Student: "/student-dashboard",
       // userId === "2" ? "/student/confidential-evaluation" :
       Admin: "/admin-dashboard"
     };
     return <Navigate to={rolePaths[user.role] || "/login"} replace />;
   }
-  
+
   return children;
 };
 
@@ -83,7 +84,8 @@ const App = () => {
           <Route path="performance" element={<SeePerformance />} />
           <Route path="confidential" element={<ConfidentialEvaluations />} />
           <Route path="email" element={<EmailSettings />} />
-          <Route path="filter-performance" element={<FilterPerformance />} />
+          <Route path="filter-performance" element={<FilterPerformance/>} />
+          <Route path="filter-performance/comparison" element={<ComparisonPage/>} />
         </Route>
 
         {/* --- HOD ROUTES --- */}
@@ -100,7 +102,7 @@ const App = () => {
         {/* --- TEACHER ROUTES --- */}
         <Route path="/teacher-dashboard" element={<ProtectedRoute allowedRole="Teacher"><Teacherlayout /></ProtectedRoute>}>
           <Route index element={<TeacherStats />} />
-          <Route path="performance" element={<SeePerformanceTeacher />} /> 
+          <Route path="performance" element={<SeePerformanceTeacher />} />
           <Route path="Class-report" element={<ClassHeldReport />} />
           <Route path="Class-report/details" element={<CHRDetails />} />
           <Route path="courses" element={<SeeCourseManagement />} />
@@ -111,23 +113,23 @@ const App = () => {
         {/* --- STUDENT ROUTES --- */}
         <Route path="/student-dashboard" element={<ProtectedRoute allowedRole="Student"><StudentDashboard /></ProtectedRoute>} />
         <Route path="/student/evaluate" element={<ProtectedRoute allowedRole="Student"><EvaluationForm /></ProtectedRoute>} />
-        
+
         {/* --- S03 SPECIAL ROUTES (STUDENT ROLE) --- */}
-        <Route 
-          path="/student/confidential-evaluation" 
+        <Route
+          path="/student/confidential-evaluation"
           element={
             <ProtectedRoute allowedRole="Student">
               <ConfidentialEvaluationsData />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/student/confidential-evaluation/confidential-form" 
+        <Route
+          path="/student/confidential-evaluation/confidential-form"
           element={
             <ProtectedRoute allowedRole="Student">
               <ConfidentialEvaluationsForm />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* --- ADMIN ROUTES --- */}

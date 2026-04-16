@@ -77,9 +77,9 @@ const Header = ({ toggleSidebar }) => {
   // LocalStorage se Director data
   const user = JSON.parse(localStorage.getItem('user')) || { name: 'Director User', role: 'Director' };
 
-  const getInitials = (name) => {
-    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-  };
+  // const getInitials = (name) => {
+  //   return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  // };
 
   return (
     <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-30 shadow-sm">
@@ -102,9 +102,9 @@ const Header = ({ toggleSidebar }) => {
       {/* Right Side: Profile (Same rounded-2xl and Green-700 bg for avatar) */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-3 bg-gray-50 p-1.5 pr-4 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-all group">
-          <div className="w-10 h-10 bg-green-700 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-green-200 group-hover:scale-105 transition-transform">
+          {/* <div className="w-10 h-10 bg-green-700 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg shadow-green-200 group-hover:scale-105 transition-transform">
             {getInitials(user.name)}
-          </div>
+          </div> */}
           <div className="hidden sm:block">
             <p className="text-xs font-black text-gray-800 leading-none mb-1">{user.name}</p>
           </div>

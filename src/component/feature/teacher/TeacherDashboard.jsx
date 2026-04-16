@@ -22,7 +22,7 @@ const TeacherStats = () => {
       title: "Class Reports", 
       desc: "Daily CHR Status & History", 
       icon: <ClipboardCheck size={24} />, 
-      path: "/teacher-dashboard/chr",
+      path: "/teacher-dashboard/Class-report",
       color: "hover:border-purple-600 hover:bg-purple-50"
     },
     { 
