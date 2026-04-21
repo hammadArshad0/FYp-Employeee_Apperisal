@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <button onClick={toggleSidebar} className="lg:hidden text-white"><X size={20} /></button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-5">
+        <nav className="flex-1 p-3 space-y-2">
           {menuItems.map((item) => (
             <Link
               key={item.name}

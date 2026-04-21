@@ -40,6 +40,8 @@ import SocietyManagement from './component/feature/hod/SocietyManagement';
 import EmailSettings from './component/feature/director/EmailSettings';
 import FilterPerformance from './component/feature/director/FilterPerformance';
 import ComparisonPage from './component/feature/director/Detailscomparison';
+import AcademicPerformance from './component/feature/director/academicPerformnce';
+import TeacherQuestionsRatingSee from './component/feature/director/teacherQuestionsRatingSee';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -86,6 +88,8 @@ const App = () => {
           <Route path="email" element={<EmailSettings />} />
           <Route path="filter-performance" element={<FilterPerformance/>} />
           <Route path="filter-performance/comparison" element={<ComparisonPage/>} />
+          <Route path="academic-performance" element={<AcademicPerformance/>} />
+          <Route path="teacher-performance/:id" element={<TeacherQuestionsRatingSee />} />
         </Route>
 
         {/* --- HOD ROUTES --- */}

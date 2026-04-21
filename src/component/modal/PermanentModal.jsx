@@ -45,7 +45,7 @@ const PermanentManagementModal = ({ isOpen, onClose, permanentTeachers, allTeach
           <div className="flex items-center gap-3">
             <Settings2 className="text-green-700" size={24} />
             <div>
-              <h2 className="text-xl font-black text-gray-800 uppercase italic tracking-tighter">Global Access Control</h2>
+              <h2 className="text-xl font-black text-gray-800 uppercase italic tracking-tighter">Permanent Evaluator</h2>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manage Permanent Faculty Members</p>
             </div>
           </div>

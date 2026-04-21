@@ -60,7 +60,7 @@ const PeerEvalution = () => {
     }
   };
 
-  // ✅ Check if logged-in user can evaluate target teacher
+  //  Check if logged-in user can evaluate target teacher
   const canEvaluate = (targetDesignation) => {
     const myRank = rankLevels[evaluatorInfo.designation?.toLowerCase()] ?? -1;
     const targetRank = rankLevels[targetDesignation?.toLowerCase()] ?? 0;

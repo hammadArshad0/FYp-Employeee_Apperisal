@@ -18,7 +18,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'See Performance', path: '/director-dashboard/performance', icon: <BarChart3 size={30} /> },
     { name: 'Confidential Evalutions', path: '/director-dashboard/confidential', icon: <Lock size={30} /> },
     {name: 'email Settings', path: '/director-dashboard/email', icon: <Lock size={30} /> },
-    {name: 'Filter Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> }
+    {name: 'Filter Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> },
+    {name: 'Academic Performance', path: '/director-dashboard/academic-performance', icon: <BarChart3 size={30} /> },
   ];
 
   return (
@@ -40,13 +41,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         </div>
 
         {/* Navigation - Same Spacing and Text Sizes */}
-        <nav className="flex-1 py-2 px-4 space-y-5">
+        <nav className="flex-1 py-2 px-4 space-y-2 overflow-y-auto">
           {menuItems.map((item) => (
             <Link
               key={item.name}
               to={item.path}
               onClick={() => window.innerWidth < 1024 && toggleSidebar()}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
                 location.pathname === item.path 
                 ? 'bg-green-600 text-white' 
                 : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
