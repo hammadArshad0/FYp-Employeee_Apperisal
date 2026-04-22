@@ -151,14 +151,14 @@ function AcademicPerformance() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <TrendingUp className="text-blue-600" size={32} />
+            {/* <TrendingUp className="text-blue-600" size={32} /> */}
             Academic Performance
           </h1>
           <p className="text-gray-500 font-medium">Evaluation based on Students, Peers, and Confidential reports.</p>
         </div>
         <button
           className="bg-slate-900 text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-blue-600 transition-all shadow-lg flex items-center gap-2"
-          onClick={() => navigate("/director-dashboard/comparison")}
+          onClick={() => navigate("/director-dashboard/filter-performance/comparison")}
         >
           <BarChart3 size={18} /> Open Comparison
         </button>
@@ -215,7 +215,7 @@ function AcademicPerformance() {
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-slate-800 uppercase italic tracking-tighter">Performance Ranking</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aggregated Evaluation (30 Point Scale)</p>
+                  {/* <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aggregated Evaluation (30 Point Scale)</p> */}
                 </div>
               </div>
               <div className="h-[350px] w-full">
@@ -288,15 +288,16 @@ function AcademicPerformance() {
 
                     <div className="space-y-5 mb-8">
                       <MetricBar label="Student Evaluation" value={(Number(t.StudentAverage) / 10) * 100} />
-                      <MetricBar label="Peer Review" value={(Number(t.PeerAverage) / 10) * 100} />
-                      <MetricBar label="Confidential Report" value={(dexieVal / 10) * 100} isDexie={hasDexie} />
+                      <MetricBar label="Peer Evaluation" value={(Number(t.PeerAverage) / 10) * 100} />
+                      <MetricBar label="Confidential Evaluation" value={(dexieVal / 10) * 100}  />
+                      {/* isDexie={hasDexie} */}
                     </div>
 
                     <button 
                       onClick={() => navigate(`/director-dashboard/teacher-performance/${t.TeacherID || t.Name}`)}
-                      className="w-full bg-slate-50 group-hover:bg-slate-900 group-hover:text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all"
+                      className="w-full bg-green-500 group-hover:bg-green-900 group-hover:text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all"
                     >
-                      See Full Performance <ChevronRight size={16} />
+                      See Question performance <ChevronRight size={16} />
                     </button>
                   </div>
                 );

@@ -8,7 +8,7 @@ import DataService from '../../../services/axios';
 import db from "../../../db"; 
 
 function TeacherQuestionsRatingSee() {
-  const { id } = useParams(); // Teacher ID/Name
+  const { id } = useParams(); // URL se Teacher ID mil rahi hai
   const navigate = useNavigate();
   
   const [sessions, setSessions] = useState([]);
@@ -19,7 +19,7 @@ function TeacherQuestionsRatingSee() {
     evalType: 'student' 
   });
 
-  // 1. Initial Load: Get Sessions from API
+  // 1. Sessions Load karein
   useEffect(() => {
     const fetchInit = async () => {
       try {
@@ -33,27 +33,29 @@ function TeacherQuestionsRatingSee() {
     fetchInit();
   }, []);
 
-  // 2. Main Data Fetching Logic (API + Dexie Grouping)
+  // 2. Fetch Logic (DEXIE + API)
   const fetchDetails = useCallback(async () => {
     if (!filters.session) return;
     setLoading(true);
     try {
       if (filters.evalType === 'confidential') {
-        // --- DEXIE LOGIC FOR CONFIDENTIAL ---
+        // --- DEXIE LOGIC ---
+        // Pura data array mein lein taake flexibility rahe
         const localData = await db.evaluations.toArray();
         
-        // Filter: Teacher Name aur Session ID match karein (Case-insensitive)
+        // Filter: TeacherId aur SessionId ko String mein convert kar ke compare karein
         const filtered = localData.filter(e => {
-          const teacher = (e.teacherName || e.TeacherName || "").trim().toLowerCase();
-          const targetTeacher = id.trim().toLowerCase();
-          const sessId = String(e.sessionId || e.SessionId || "");
-          const targetSess = String(filters.session);
-          return teacher === targetTeacher && sessId === targetSess;
+          const eTeacherId = String(e.teacherId || "");
+          const eSessionId = String(e.sessionId || "");
+          const targetTeacherId = String(id);
+          const targetSessionId = String(filters.session);
+          
+          return eTeacherId === targetTeacherId && eSessionId === targetSessionId;
         });
 
-        // Grouping: Raw records ko question-wise stats mein convert karein
+        // Grouping: Questions ke mutabiq aggregation
         const grouped = filtered.reduce((acc, curr) => {
-          const qText = curr.questionText || curr.QuestionText || curr.remarks || "General Assessment";
+          const qText = curr.questionText || curr.QuestionText || `Question ${curr.questionId}`;
           if (!acc[qText]) {
             acc[qText] = { 
               QuestionText: qText, 
@@ -82,7 +84,7 @@ function TeacherQuestionsRatingSee() {
         
         setQuestionsData(formatted);
       } else {
-        // --- API LOGIC FOR STUDENT/PEER ---
+        // --- API LOGIC ---
         const res = await DataService.get('/AcademicPerformance/GetTeacherQuestionStatsFull', {
           params: { 
             teacherId: id, 
@@ -94,7 +96,6 @@ function TeacherQuestionsRatingSee() {
         const formatted = (res.data || []).map(q => ({
           ...q,
           RatingPercent: (q.AverageScore / 4) * 100,
-          // Backend keys check (API might return Score1, Score2 etc)
           Score1: q.Score1 || 0,
           Score2: q.Score2 || 0,
           Score3: q.Score3 || 0,
@@ -111,7 +112,7 @@ function TeacherQuestionsRatingSee() {
 
   useEffect(() => { fetchDetails(); }, [fetchDetails]);
 
-  // Helper: Detailed Star Counts UI
+  // Star Badge Renderer
   const renderDetailedStars = (q) => {
     const categories = [
       { label: 'Poor', stars: 1, count: q.Score1, color: 'text-red-500', fill: 'fill-red-500' },
@@ -141,7 +142,7 @@ function TeacherQuestionsRatingSee() {
   return (
     <div className="p-8 bg-gray-50 min-h-screen space-y-8 animate-in fade-in duration-500">
       
-      {/* Navigation Header */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-500 font-bold group">
           <div className="p-2 bg-white rounded-xl shadow-sm group-hover:bg-slate-900 group-hover:text-white transition-all">
@@ -151,20 +152,20 @@ function TeacherQuestionsRatingSee() {
         </button>
         <div className="text-right">
           <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter flex items-center justify-end gap-2">
-            <TrendingUp className="text-blue-600" /> Detailed Performance
+            See Question Ratings
           </h1>
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{id}</p>
         </div>
       </div>
 
-      {/* Filter Card */}
+      {/* Filters */}
       <div className="bg-white p-7 rounded-[2.5rem] shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-2">
           <label className="text-[10px] font-black text-gray-400 uppercase ml-2">Academic Session</label>
           <select 
             value={filters.session}
             onChange={(e) => setFilters(prev => ({ ...prev, session: e.target.value }))}
-            className="w-full bg-gray-50 p-4 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+            className="w-full bg-gray-50 p-4 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 appearance-none shadow-inner"
           >
             {sessions.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
@@ -174,16 +175,16 @@ function TeacherQuestionsRatingSee() {
           <select 
             value={filters.evalType}
             onChange={(e) => setFilters(prev => ({ ...prev, evalType: e.target.value }))}
-            className="w-full bg-gray-50 p-4 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+            className="w-full bg-gray-50 p-4 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 appearance-none shadow-inner"
           >
             <option value="student">Student Evaluation</option>
-            <option value="peer">Peer Review</option>
-            <option value="confidential">Confidential (Dexie DB)</option>
+            <option value="peer">Peer Evaluation</option>
+            <option value="confidential">Confidential Evaluation</option>
           </select>
         </div>
       </div>
 
-      {/* Data Visualization List */}
+      {/* Main Stats List */}
       <div className="bg-white rounded-[3.5rem] p-8 shadow-sm border border-gray-100 min-h-[500px]">
         <div className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-4">
@@ -194,8 +195,8 @@ function TeacherQuestionsRatingSee() {
           </div>
           {filters.evalType === 'confidential' && (
             <div className="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-2xl border border-green-100">
-              <ShieldCheck size={16} />
-              <span className="text-[10px] font-black uppercase">Local Data Stream</span>
+              {/* <ShieldCheck size={16} /> */}
+              {/* <span className="text-[10px] font-black uppercase tracking-widest">Dexie Sync Active</span> */}
             </div>
           )}
         </div>
@@ -203,7 +204,7 @@ function TeacherQuestionsRatingSee() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-40">
             <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
-            <p className="text-slate-400 font-black text-xs uppercase tracking-widest">Aggregating Scores...</p>
+            <p className="text-slate-400 font-black text-xs uppercase tracking-widest">Processing Metrics...</p>
           </div>
         ) : questionsData.length > 0 ? (
           <div className="grid grid-cols-1 gap-8">
@@ -227,7 +228,6 @@ function TeacherQuestionsRatingSee() {
                         </span>
                       </div>
 
-                      {/* Detailed Rating Breakdown */}
                       {renderDetailedStars(q)}
                     </div>
                   </div>
@@ -236,7 +236,7 @@ function TeacherQuestionsRatingSee() {
                     <div className={`text-4xl font-black italic tracking-tighter ${q.RatingPercent >= 75 ? 'text-green-600' : 'text-blue-600'}`}>
                       {Math.round(q.RatingPercent)}%
                     </div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Efficiency</p>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Performance</p>
                   </div>
                 </div>
 
@@ -254,7 +254,9 @@ function TeacherQuestionsRatingSee() {
           <div className="flex flex-col items-center justify-center py-40 text-gray-200">
             <Search size={80} className="mb-4 opacity-20" />
             <h4 className="text-xl font-black uppercase tracking-widest text-slate-300">No Metrics Found</h4>
-            <p className="text-xs font-bold text-slate-400 mt-1 uppercase italic tracking-tighter">Check your filters or local database sync</p>
+            <p className="text-xs font-bold text-slate-400 mt-1 uppercase italic tracking-tighter text-center">
+              Make sure data is synced in Dexie for Session {filters.session} <br /> and Teacher ID: {id}
+            </p>
           </div>
         )}
       </div>

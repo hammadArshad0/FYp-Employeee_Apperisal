@@ -146,7 +146,7 @@ function FilterPerformance() {
             <BarChart3 className="text-green-600" size={32} />
             Director See Performance
           </h1>
-          <p className="text-gray-500 font-medium">Monitoring Teacher Performance with Kpi score.</p>
+          <p className="text-gray-500 font-medium">Teacher Performance with Kpi score.</p>
         </div>
        <button
       className="border border-black-2 text-black-2 px-4 py-2 rounded-full font-bold text-sm hover:bg-gray-100 transition-colors"
@@ -166,7 +166,7 @@ function FilterPerformance() {
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Faculty/Dept</label>
+          <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Departement</label>
           <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)}
             className="w-full bg-gray-50 border-none p-4 rounded-2xl font-bold text-gray-700 focus:ring-2 focus:ring-green-500 transition-all outline-none">
             {departments.map((d, i) => <option key={i} value={d}>{d}</option>)}
@@ -201,9 +201,9 @@ function FilterPerformance() {
                     <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">
                       Top Performance Overview
                     </h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                    {/* <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
                       Sorted by Aggregate Weighted Score (Including Local Data)
-                    </p>
+                    </p> */}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -306,8 +306,8 @@ function FilterPerformance() {
                         </div>
                         {hasDexie && (
                           <div className="mt-2 flex items-center gap-1.5 bg-green-50 border border-green-200 px-3 py-1 rounded-full w-fit">
-                            <ShieldCheck size={12} className="text-green-600" />
-                            <span className="text-[9px] font-black text-green-700 uppercase tracking-wider">Local Data Applied</span>
+                            {/* <ShieldCheck size={12} className="text-green-600" /> */}
+                            {/* <span className="text-[9px] font-black text-green-700 uppercase tracking-wider">Local Data Applied</span> */}
                           </div>
                         )}
                       </div>
@@ -319,7 +319,7 @@ function FilterPerformance() {
                         <p className="font-bold text-gray-700">{data.CourseCode}</p>
                       </div>
                       <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                        <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Final Weighted</p>
+                        <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Percentage%</p>
                         <p className={`font-black ${
                           overallPerc >= 80 ? 'text-green-700' :
                           overallPerc >= 60 ? 'text-orange-700' :
@@ -331,7 +331,7 @@ function FilterPerformance() {
                     <div className="space-y-6">
                       <MetricBar label="Student Evaluation"     value={studentPerc} />
                       <MetricBar label="Peer Review"            value={peerPerc} />
-                      <MetricBar label="Confidential Eval"      value={confPerc} isDexie={hasDexie} />
+                      <MetricBar label="Confidential Eval"      value={confPerc}  />
                       <MetricBar label="KPI Compliance"         value={kpiPerc} />
                     </div>
                   </div>
