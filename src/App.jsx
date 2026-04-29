@@ -42,6 +42,8 @@ import FilterPerformance from './component/feature/director/FilterPerformance';
 import ComparisonPage from './component/feature/director/Detailscomparison';
 import AcademicPerformance from './component/feature/director/academicPerformnce';
 import TeacherQuestionsRatingSee from './component/feature/director/teacherQuestionsRatingSee';
+import ChairpersonMentorEval from './component/feature/teacher/ChairpersonMentorEval';
+import HODChairpersonEval from './component/feature/hod/HODChairpersonEval';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -101,6 +103,7 @@ const App = () => {
           <Route path="courses" element={<CourseManagement />} />
           <Route path="chr" element={<CHRManagement />} />
           <Route path="societies" element={<SocietyManagement />} />
+          <Route path ="society-evaluation" element={<HODChairpersonEval />} />
         </Route>
 
         {/* --- TEACHER ROUTES --- */}
@@ -112,6 +115,7 @@ const App = () => {
           <Route path="courses" element={<SeeCourseManagement />} />
           <Route path="peer" element={<PeerEvaluation />} />
           <Route path="evaluate/:teacherId/:courseCode" element={<PeerEvaluationForm />} />
+          <Route path="society-evaluation" element={<ChairpersonMentorEval />} />
         </Route>
 
         {/* --- STUDENT ROUTES --- */}

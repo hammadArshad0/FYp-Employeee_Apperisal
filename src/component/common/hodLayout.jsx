@@ -4,6 +4,7 @@ import {
   Plus, UserPlus, BarChart3, LayoutDashboard, 
   LogOut, BookOpen, Menu, X ,ChevronDown,
   Building2,
+  Users,
 
 } from 'lucide-react';
 
@@ -19,6 +20,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'Course Management', path: '/hod-dashboard/courses', icon: <BookOpen size={30} /> },
     { name: 'CHR', path: '/hod-dashboard/chr', icon: <BarChart3 size={30} /> },
     { name: 'Society Management', path: '/hod-dashboard/societies', icon: <Building2 size={30} /> },
+    {name:'Society Evaluation',path:'/hod-dashboard/society-evaluation',icon:<Users size={30} />},
   ];
 
   return (
@@ -96,9 +98,10 @@ const Header = ({ toggleSidebar }) => {
           <Menu size={24} />
         </button>
         <div className="hidden md:block">
-          <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Active Session</p>
+          {/* <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Active Session</p> */}
           <h2 className="text-gray-800 font-black text-lg flex items-center gap-2">
-            {user.role}: <span className="text-gray-500 font-bold">{user.name}</span>
+            {user.role}: 
+            <span className="text-gray-500 font-bold">{ 'Dr. Munir'}</span>
           </h2>
         </div>
       </div>
@@ -113,7 +116,7 @@ const Header = ({ toggleSidebar }) => {
             {getInitials(user.name)}
           </div> */}
           <div className="hidden sm:block">
-            <p className="text-xs font-black text-gray-800 leading-none mb-1">{user.name}</p>
+            {/* <p className="text-xs font-black text-gray-800 leading-none mb-1">{user.name}</p> */}
 
           </div>
           {/* <ChevronDown size={14} className="text-gray-400 group-hover:text-green-600" /> */}

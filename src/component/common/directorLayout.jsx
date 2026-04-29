@@ -15,10 +15,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     // { name: 'Make Questionnaire Teacher', path: '/director-dashboard/make-questionnaire-teacher', icon: <ClipboardList size={30} /> },
      { name: 'Make Questionnaire ', path: '/director-dashboard/make-questionnaire', icon: <ClipboardList size={30} /> },
     { name: 'Add KPIs', path: '/director-dashboard/add-kpi', icon: <Plus size={30} /> },
-    { name: 'See Performance', path: '/director-dashboard/performance', icon: <BarChart3 size={30} /> },
+    // { name: 'See Performance', path: '/director-dashboard/performance', icon: <BarChart3 size={30} /> },
     { name: 'Confidential Evalutions', path: '/director-dashboard/confidential', icon: <Lock size={30} /> },
     {name: 'email Settings', path: '/director-dashboard/email', icon: <Lock size={30} /> },
-    {name: 'Filter Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> },
+    {name: 'See Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> },
     {name: 'Academic Performance', path: '/director-dashboard/academic-performance', icon: <BarChart3 size={30} /> },
   ];
 
@@ -95,7 +95,7 @@ const Header = ({ toggleSidebar }) => {
         <div className="hidden md:block">
          
           <h2 className="text-gray-800 font-black text-lg flex items-center gap-2">
-            {user.role}: <span className="text-gray-500 font-bold">{user.name}</span>
+            {user.role}: <span className="text-gray-500 font-bold">{'Dr.Jamil Sawar'}</span>
           </h2>
         </div>
       </div>
@@ -107,7 +107,7 @@ const Header = ({ toggleSidebar }) => {
             {getInitials(user.name)}
           </div> */}
           <div className="hidden sm:block">
-            <p className="text-xs font-black text-gray-800 leading-none mb-1">{user.name}</p>
+            {/* <p className="text-xs font-black text-gray-800 leading-none mb-1">{user.name}</p> */}
           </div>
         </div>
       </div>

@@ -22,6 +22,7 @@ const Teacherlayout = () => {
     { name: 'Class Held Report', path: '/teacher-dashboard/Class-report', icon: <ClipboardCheck size={22} /> },
     { name: 'Course Management', path: '/teacher-dashboard/courses', icon: <BookOpen size={22} /> },
     { name: 'Peer Evaluation', path: '/teacher-dashboard/peer', icon: <Users size={22} /> },
+    {name:'Society Mentor Evalution',path:'/teacher-dashboard/society-evaluation',icon:<Users size={22} />},
   ];
 
   const closeSidebar = () => setIsSidebarOpen(false);

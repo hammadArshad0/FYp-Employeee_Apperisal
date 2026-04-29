@@ -13,6 +13,8 @@ const CreateEvaluationQuestionaire = () => {
     { label: "Teacher Evaluation", value: "T" }, 
     { label: "Student Evaluation", value: "S" },
     { label: "Confidential Evaluation", value: "C" },
+    { label: "Society Evaluation(chairperson", value: "SEC" },
+    { label: "Society Evaluation(Mentor)", value: "SEM" }
   ];
 
   const addQuestion = () => setQuestions([...questions, ""]);
@@ -69,8 +71,8 @@ const CreateEvaluationQuestionaire = () => {
         {/* Header Banner - Same Green as Dashboard */}
         <div className="bg-green-700 p-10 text-white flex justify-between items-center relative overflow-hidden">
           <div className="relative z-10">
-            <h1 className="text-3xl font-black tracking-tight uppercase italic">Construct Questionnaire</h1>
-            <p className="text-green-50 font-medium opacity-90">Design and publish custom evaluation forms</p>
+            <h1 className="text-3xl font-black tracking-tight uppercase italic">Make Questionnaire</h1>
+            <p className="text-green-50 font-medium opacity-90">Design  evaluation forms</p>
           </div>
           <FileText size={120} className="absolute -right-4 -bottom-4 text-white opacity-10 rotate-12" />
         </div>
