@@ -45,25 +45,32 @@ const DirectorDashboard = () => {
     },
      { 
       title: "Confidential Evaluations", 
-      desc: "View sensitive evaluations", 
+      desc: "View  evaluations", 
       icon: <Lock size={24} />, 
       path: "/director-dashboard/confidential",
       color: "hover:border-green-600 hover:bg-green-50"
     },
      { 
       title: "email Settings", 
-      desc: "View sensitive evaluations", 
+      desc: "Manage email ", 
       icon: <Settings size={24} />, 
       path: "/director-dashboard/email",
       color: "hover:border-green-600 hover:bg-green-50"
     },
        { 
       title: "Filter Performance", 
-      desc: "View sensitive evaluations", 
+      desc: "View  evaluations", 
       icon: <Settings size={24} />, 
       path: "/director-dashboard/filter-performance",
       color: "hover:border-green-600 hover:bg-green-50"
     },
+    {
+      title: "Academic Performance",
+      desc: "View academic performance",
+      icon: <BarChart3 size={24} />,  
+      path: "/director-dashboard/academic-performance",
+      color:"hover:border-emerald-600 hover:bg-emerald-50"
+    }
   ];
 
   return (

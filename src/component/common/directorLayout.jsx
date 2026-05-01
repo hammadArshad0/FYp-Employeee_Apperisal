@@ -15,10 +15,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     // { name: 'Make Questionnaire Teacher', path: '/director-dashboard/make-questionnaire-teacher', icon: <ClipboardList size={30} /> },
      { name: 'Make Questionnaire ', path: '/director-dashboard/make-questionnaire', icon: <ClipboardList size={30} /> },
     { name: 'Add KPIs', path: '/director-dashboard/add-kpi', icon: <Plus size={30} /> },
-    // { name: 'See Performance', path: '/director-dashboard/performance', icon: <BarChart3 size={30} /> },
+    { name: 'See Performance', path: '/director-dashboard/performance', icon: <BarChart3 size={30} /> },
     { name: 'Confidential Evalutions', path: '/director-dashboard/confidential', icon: <Lock size={30} /> },
     {name: 'email Settings', path: '/director-dashboard/email', icon: <Lock size={30} /> },
-    {name: 'See Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> },
+    {name: 'filter Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> },
     {name: 'Academic Performance', path: '/director-dashboard/academic-performance', icon: <BarChart3 size={30} /> },
   ];
 

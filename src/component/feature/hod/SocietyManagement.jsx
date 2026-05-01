@@ -78,23 +78,40 @@ const SocietyManagement = () => {
 
   // --- ASSIGNMENT ACTIONS ---
   const handleAssignChairperson = async () => {
-    if (!targetSocId || !selectedChairpersonId) return alert("Please select a Society and a Chairperson");
+    // 1. Validation: Ensure all fields are selected
+    // Note: selectedChairpersonId string hai, isliye parseInt nahi lagayenge
+    if (!targetSocId || !selectedChairpersonId || !selectedSession) {
+        return alert("Please select a Society, a Chairperson, and a Session");
+    }
     
     const payload = {
-      TeacherId: parseInt(selectedChairpersonId),
+      TeacherId: selectedChairpersonId, // Fixed: parseInt hata diya kyunki ID string hai
       SocietyId: parseInt(targetSocId),
       SessionId: parseInt(selectedSession),
       IsChairperson: true,
       IsMentor: false
     };
 
+    console.log("Assigning Chairperson Payload:", payload);
+
     try {
-      await DataService.post('/SocietyManagement/AssignTeacher', payload);
-      alert("Chairperson Assigned Successfully!");
+      const response = await DataService.post('/SocietyManagement/AssignTeacher', payload);
+      
+      // 2. Success Handling
+      alert("Chairperson Assigned/Updated Successfully!");
+      
+      // State reset karein taake selection clear ho jaye
       setSelectedChairpersonId(null);
-      fetchSocieties();
+      
+      // 3. UI Refresh: Matrix aur list ko update karne ke liye
+      fetchSocieties(); 
+      
     } catch (err) { 
-      alert("Chairperson assignment failed. Check if teacher is already assigned."); 
+      console.error("Assignment Error:", err.response?.data || err.message);
+      
+      // Backend se aane wala specific error message dikhayen
+      const errorMsg = err.response?.data?.ExceptionMessage || err.response?.data?.message || "Assignment failed";
+      alert("Error: " + errorMsg); 
     }
   };
 
