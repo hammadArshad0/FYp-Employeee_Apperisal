@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, Power, PowerOff, ClipboardList, Edit3, HelpCircle, 
-  Loader2, Trash2, Archive, Activity 
+  Loader2, Trash2, Archive, Activity, ChevronDown
 } from 'lucide-react';
 import DataService from '../../../services/axios';
 
 const MakeQuestionaire = () => {
   const [questionnaires, setQuestionnaires] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [archiveOpen, setArchiveOpen] = useState(false); // ← NEW
   const navigate = useNavigate();
 
   useEffect(() => { fetchAll(); }, []);
@@ -25,16 +26,11 @@ const MakeQuestionaire = () => {
     }
   };
 
-  // --- UPDATED DELETE FUNCTION ---
   const handleDelete = async (id) => {
-    // Confirmation Dialog
     if (window.confirm("Are you sure? This will permanently delete the questionnaire and all associated questions.")) {
       try {
-        // Backend API call: [HttpDelete] api/Questions/Delete/{id}
         const res = await DataService.delete(`/Questions/Delete/${id}`);
-        
         if (res.status === 200) {
-          // UI update: List se us item ko remove karna baghair refresh kiye
           setQuestionnaires(prev => prev.filter(q => q.Id !== id));
           alert("Deleted successfully!");
         }
@@ -147,19 +143,44 @@ const MakeQuestionaire = () => {
             )}
           </section>
 
-          {/* Archived List */}
-          <section className="space-y-6 pt-10 border-t border-gray-50">
-            <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-              <Archive className="text-gray-400" size={24}/>
-              <h3 className="font-black text-gray-400 uppercase italic tracking-tighter text-lg">Drafts & Archived</h3>
-            </div>
-            {archivedForms.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {archivedForms.map(RenderCard)}
+          {/* ── Archived List (Collapsible) ── */}
+          <section className="pt-10 border-t border-gray-50 space-y-6">
+
+            {/* Clickable Header */}
+            <button
+              onClick={() => setArchiveOpen(!archiveOpen)}
+              className="w-full flex items-center justify-between border-b border-gray-100 pb-4"
+            >
+              <div className="flex items-center gap-3">
+                <Archive className="text-gray-400" size={32}/>
+                <h3 className="font-black text-white p-4 border-2 bg-green-700 rounded-lg  uppercase italic tracking-tighter text-lg">
+                  Drafts & Archived
+                </h3>
+                {/* Count Badge */}
+                <span className="bg-gray-100 text-gray-400 text-[10px] font-black px-2.5 py-1 rounded-full">
+                  {archivedForms.length}
+                </span>
               </div>
-            ) : (
-              <div className="text-center py-10 text-gray-300 font-bold uppercase text-[10px]">No archived forms found.</div>
+              {/* Arrow — rotate when open */}
+              <ChevronDown 
+                size={20} 
+                className={`text-gray-300 transition-transform duration-300 ${archiveOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {/* Cards — sirf tab dikhenge jab archiveOpen = true */}
+            {archiveOpen && (
+              archivedForms.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {archivedForms.map(RenderCard)}
+                </div>
+              ) : (
+                <div className="text-center py-10 text-gray-300 font-bold uppercase text-[10px]">
+                  No archived forms found.
+                </div>
+              )
             )}
+
           </section>
         </>
       )}

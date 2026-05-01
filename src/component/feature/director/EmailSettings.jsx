@@ -5,8 +5,11 @@ import DataService from '../../../services/axios';
 const EmailSettings = () => {
   const [emails, setEmails] = useState([]);
   const [newEmail, setNewEmail] = useState("");
-  const [editingId, setEditingId] = useState(null); // Track karney ke liye ke kaunsa record edit ho raha hai
-  const [editValue, setEditValue] = useState(""); // Edit hotay waqt temporary value
+  const [newPassword, setNewPassword] = useState("");
+
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState("");
+  const [editPassword, setEditPassword] = useState("");
 
   useEffect(() => {
     fetchEmails();
@@ -16,135 +19,205 @@ const EmailSettings = () => {
     try {
       const res = await DataService.get('/email/getall');
       setEmails(res.data);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  // ✅ ADD EMAIL
   const handleAddEmail = async () => {
-    if (!newEmail) return alert("Enter email");
+    if (!newEmail || !newPassword) {
+      return alert("Enter email & password");
+    }
+
     try {
-      await DataService.post('/email/add', { mail: newEmail });
+      await DataService.post('/email/add', {
+        mail: newEmail,
+        password: newPassword
+      });
+
       setNewEmail("");
+      setNewPassword("");
       fetchEmails();
-    } catch (err) { alert("Error adding email"); }
+    } catch (err) {
+      alert("Error adding email");
+    }
   };
 
-  // Edit mode on karne ke liye
+  // ✅ START EDIT
   const startEdit = (email) => {
     setEditingId(email.id);
     setEditValue(email.mail);
+    setEditPassword(""); // security ke liye blank rakho
   };
 
-  // Update API call
+  // ✅ UPDATE EMAIL + PASSWORD
   const handleUpdate = async (id) => {
-    if (!editValue) return alert("Email cannot be empty");
+    if (!editValue || !editPassword) {
+      return alert("Email & password required");
+    }
+
     try {
-      await DataService.put(`/email/edit/${id}`, { mail: editValue });
+      await DataService.put(`/email/edit/${id}`, {
+        mail: editValue,
+        password: editPassword
+      });
+
       setEditingId(null);
       fetchEmails();
-    } catch (err) { alert("Error updating email"); }
+    } catch (err) {
+      alert("Error updating email");
+    }
   };
 
+  // ✅ ACTIVATE
   const handleActivate = async (id) => {
     try {
       await DataService.put(`/email/activate/${id}`);
       fetchEmails();
-    } catch (err) { alert("Error activating email"); }
+    } catch (err) {
+      alert("Error activating email");
+    }
   };
 
+  // ✅ DELETE
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this email?")) return;
+
     try {
       await DataService.delete(`/email/delete/${id}`);
       fetchEmails();
-    } catch (err) { alert("Error deleting email"); }
+    } catch (err) {
+      alert("Error deleting email");
+    }
   };
 
   const activeEmail = emails.find(e => e.isActive);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-slate-50 min-h-screen">
-      {/* Header aur Banner wahi rahay ga */}
+
+      {/* HEADER */}
       <div className="flex items-center gap-4 mb-6">
-        <button className="p-2 bg-white rounded-lg border shadow-sm"><ArrowLeft size={20}/></button>
+        <button className="p-2 bg-white rounded-lg border shadow-sm">
+          <ArrowLeft size={20}/>
+        </button>
         <div>
           <h2 className="text-xl font-bold">Email Settings</h2>
           <p className="text-xs text-gray-500">Confidential Evaluations</p>
         </div>
       </div>
 
-      {/* <div className="bg-green-700 text-white p-3 rounded-xl mb-8 text-center font-bold">
-        Current Session: Fall 2025
-      </div> */}
-
-      {/* Active Recipient Box Display */}
+      {/* ACTIVE EMAIL */}
       {activeEmail && (
         <div className="bg-white border-2 border-green-500 rounded-3xl p-6 mb-8 flex items-start gap-4 shadow-sm">
-          <div className="bg-green-600 p-2 rounded-xl text-white"><CheckCircle size={24} /></div>
+          <div className="bg-green-600 p-2 rounded-xl text-white">
+            <CheckCircle size={24} />
+          </div>
           <div>
-            <div className="flex items-center gap-2 text-gray-800 font-bold uppercase text-xs">🔐 Current Active Recipient</div>
-            <p className="text-green-700 font-bold my-1">{activeEmail.mail}</p>
+            <div className="text-xs font-bold uppercase">🔐 Current Active</div>
+            <p className="text-green-700 font-bold">{activeEmail.mail}</p>
           </div>
         </div>
       )}
 
-      {/* Add New Section */}
+      {/* ADD SECTION */}
       <div className="bg-white border rounded-3xl p-8 mb-10 shadow-sm">
-        <div className="flex items-center gap-2 font-bold text-gray-700 mb-6"><Plus size={20} /> Add New Recipient</div>
+        <div className="flex items-center gap-2 font-bold mb-6">
+          <Plus size={20} /> Add New Email
+        </div>
+
         <div className="space-y-4">
-          <input 
-            type="email" 
-            placeholder="example@university.edu"
+          <input
+            type="email"
+            placeholder="example@gmail.com"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
-            className="w-full bg-gray-100 border-none rounded-xl p-4 outline-none focus:ring-2 focus:ring-green-600"
+            className="w-full bg-gray-100 rounded-xl p-4"
           />
-          <button onClick={handleAddEmail} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700">
-            <Mail size={18} /> Add Email
+
+          <input
+            type="password"
+            placeholder="App Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="w-full bg-gray-100 rounded-xl p-4"
+          />
+
+          <button
+            onClick={handleAddEmail}
+            className="w-full bg-green-600 text-white py-3 rounded-xl flex justify-center gap-2"
+          >
+            <Mail size={18}/> Add Email
           </button>
         </div>
       </div>
 
-      {/* List Section with Edit Logic */}
+      {/* LIST */}
       <div className="space-y-4">
-        <div className="font-bold text-gray-600 text-sm mb-4">📩 Saved Recipient Emails ({emails.length})</div>
-        
+        <div className="font-bold text-sm">
+          Emails ({emails.length})
+        </div>
+
         {emails.map((email) => (
-          <div key={email.id} className={`bg-white border rounded-2xl p-5 flex items-center justify-between ${email.isActive ? 'ring-2 ring-green-500' : ''}`}>
-            <div className="flex items-center gap-4 flex-1">
-              <input type="radio" checked={email.isActive} onChange={() => handleActivate(email.id)} className="w-5 h-5 accent-green-600 cursor-pointer" />
-              
-              {/* Conditional Rendering: Agar edit ho raha hai to input dikhao, warna text */}
+          <div key={email.id} className={`bg-white p-5 rounded-xl flex justify-between ${email.isActive ? 'ring-2 ring-green-500' : ''}`}>
+            
+            <div className="flex gap-4 flex-1">
+              <input
+                type="radio"
+                checked={email.isActive}
+                onChange={() => handleActivate(email.id)}
+              />
+
               {editingId === email.id ? (
-                <input 
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  className="border-b-2 border-green-600 outline-none font-bold text-gray-700 text-sm w-full bg-transparent"
-                  autoFocus
-                />
+                <div className="w-full space-y-2">
+                  <input
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="w-full border-b"
+                  />
+                  <input
+                    type="password"
+                    placeholder="New App Password"
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                    className="w-full border-b"
+                  />
+                </div>
               ) : (
                 <div>
-                  <p className="font-bold text-gray-700 text-sm">{email.mail}</p>
-                  {email.isActive && <span className="bg-green-600 text-white text-[10px] px-3 py-1 rounded-full font-bold">Active</span>}
+                  <p className="font-bold">{email.mail}</p>
+                  {email.isActive && <span className="text-green-600 text-xs">Active</span>}
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               {editingId === email.id ? (
                 <>
-                  <button onClick={() => handleUpdate(email.id)} className="text-green-600 p-2"><Save size={18}/></button>
-                  <button onClick={() => setEditingId(null)} className="text-gray-400 p-2"><X size={18}/></button>
+                  <button onClick={() => handleUpdate(email.id)}>
+                    <Save size={18}/>
+                  </button>
+                  <button onClick={() => setEditingId(null)}>
+                    <X size={18}/>
+                  </button>
                 </>
               ) : (
                 <>
-                  <button onClick={() => startEdit(email)} className="text-blue-500 p-2 hover:bg-blue-50 rounded-lg"><Edit2 size={18}/></button>
-                  <button onClick={() => handleDelete(email.id)} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={18}/></button>
+                  <button onClick={() => startEdit(email)}>
+                    <Edit2 size={18}/>
+                  </button>
+                  <button onClick={() => handleDelete(email.id)}>
+                    <Trash2 size={18}/>
+                  </button>
                 </>
               )}
             </div>
+
           </div>
         ))}
       </div>
+
     </div>
   );
 };

@@ -30,6 +30,10 @@ const SeePerformance = () => {
 
   const isConfidential = (name) => (name || '').toLowerCase().includes('confidential');
 
+  /////////////
+  // const isSociety = (name) => (name || '').toLowerCase().includes('society');
+  ////////////////////////
+
   const fetchPerformance = async () => {
     if (!selectedTeacher || !selectedSession) return;
     setLoading(true);
@@ -92,7 +96,11 @@ const SeePerformance = () => {
         return {
           name: sub.SubName,
           performance: perf,
-          isConf: isConfidential(sub.SubName) && hasDexieData
+          isConf: isConfidential(sub.SubName) && hasDexieData,
+          //////////////////////////
+          // isSociety: isSociety(sub.SubName)
+          isSociety: sub.IsSociety ?? false
+          ///////////////////
         };
       })
     );
@@ -130,18 +138,18 @@ const SeePerformance = () => {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
             {/* SCOREBOARD */}
-            <div className="bg-green-900 p-8 md:p-12 rounded-[3.5rem] text-white flex flex-col md:flex-row justify-between items-center shadow-2xl relative overflow-hidden">
+            <div className="bg-green-900 p-4 rounded-[2.5rem] text-white flex flex-col md:flex-row justify-between items-center shadow-2xl relative overflow-hidden">
               <div className="relative z-10 text-center md:text-left">
                 <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter leading-none">{data.TeacherName}</h2>
                 <p className="text-green-300 font-bold text-sm uppercase tracking-[0.2em] mt-3">{data.Department} • {data.SessionName}</p>
-                {hasDexieData && (
-                  <div className="mt-6 flex items-center justify-center md:justify-start gap-2 bg-white/10 px-4 py-2 rounded-full border border-white/10 w-fit backdrop-blur-md">
-                    <ShieldCheck size={16} className="text-green-400" />
-                    <span className="text-[10px] font-black uppercase tracking-tighter">Director's Local Data Integrated</span>
-                  </div>
-                )}
+                {/* {hasDexieData && (
+                  // <div className="mt-6 flex items-center justify-center md:justify-start gap-2 bg-white/10 px-4 py-2 rounded-full border border-white/10 w-fit backdrop-blur-md">
+                  //   <ShieldCheck size={16} className="text-green-400" />
+                  //   <span className="text-[10px] font-black uppercase tracking-tighter">Director's Local Data Integrated</span>
+                  // </div>
+                )} */}
               </div>
-              <div className="relative z-10 bg-white/5 p-10 rounded-[3rem] text-center min-w-[260px] border border-white/10 mt-8 md:mt-0 backdrop-blur-sm">
+              <div className="relative z-10 bg-white/5 p-4 rounded-[3rem] text-center min-w-[260px] border border-white/10 mt-8 md:mt-0 backdrop-blur-sm">
                 <p className="text-[11px] font-bold uppercase opacity-50 tracking-[0.3em] mb-2">Aggregate Score</p>
                 <p className="text-8xl font-black leading-none tracking-tighter">{finalOverall}%</p>
               </div>
@@ -192,7 +200,13 @@ const SeePerformance = () => {
                     <Bar dataKey="performance" radius={[12, 12, 4, 4]} barSize={50}>
                       {getGraphData().map((entry, index) => {
                         let barColor = entry.performance >= 80 ? "#22c55e" : entry.performance >= 40 ? "#f97316" : "#ef4444";
-                        if (entry.isConf) barColor = "#064e3b";
+                        ///////////////////////////////////////////////////
+                        if (entry.isSociety) {
+                          barColor = "#7c3aed"; // society highest priority
+                        } else if (entry.isConf) {
+                          barColor = "#064e3b";
+                        } // purple for society
+                        ///////////////////////////////////////////////////////
                         return <Cell key={`cell-${index}`} fill={barColor} className="hover:opacity-80 transition-all duration-300" />;
                       })}
                       <LabelList dataKey="performance" position="top" formatter={(v) => `${v}%`}
@@ -234,8 +248,8 @@ const SeePerformance = () => {
               {data.Breakdown.flatMap((kpi) =>
                 kpi.SubDetails.map((sub, idx) => {
                   const finalPerc = Math.min(100, Math.round((sub.AchievedSync / sub.SubMax) * 100) || 0);
-                  let barColor  = finalPerc >= 80 ? "bg-green-600"  : finalPerc >= 60 ? "bg-amber-500"  : "bg-red-500";
-                  let textColor = finalPerc >= 80 ? "text-green-700": finalPerc >= 60 ? "text-amber-600": "text-red-600";
+                  let barColor = finalPerc >= 80 ? "bg-green-600" : finalPerc >= 60 ? "bg-amber-500" : "bg-red-500";
+                  let textColor = finalPerc >= 80 ? "text-green-700" : finalPerc >= 60 ? "text-amber-600" : "text-red-600";
 
                   return (
                     <div key={`${kpi.KPIName}-${idx}`} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all flex items-center gap-6">
@@ -243,9 +257,16 @@ const SeePerformance = () => {
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{kpi.KPIName}</p>
                         <h4 className="text-lg font-black text-slate-800 uppercase italic tracking-tighter truncate">
                           {sub.SubName}
+
                           {isConfidential(sub.SubName) && hasDexieData && (
                             <span className="ml-2 text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-black normal-case not-italic">
                               Local Data Applied
+                            </span>
+
+                          )}
+                         {sub.IsSociety &&  (
+                            <span className="ml-2 text-[9px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-black normal-case not-italic">
+                              Society
                             </span>
                           )}
                         </h4>

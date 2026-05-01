@@ -124,7 +124,7 @@ const SeePerformanceTeacher = () => {
             </div>
             <div>
               <h3 className="font-black uppercase italic text-slate-800 leading-none">Select Session</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">View historical performance</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">View performance</p>
             </div>
           </div>
           <select 
@@ -149,20 +149,20 @@ const SeePerformanceTeacher = () => {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             
             {/* SCOREBOARD */}
-            <div className="bg-green-900 p-8 md:p-8 rounded-[3.5rem] text-white flex flex-col md:flex-row justify-between items-center shadow-2xl relative overflow-hidden">
+            <div className="bg-green-900 p-4 rounded-[2.5rem] text-white flex flex-col md:flex-row justify-between items-center shadow-2xl relative overflow-hidden">
               <div className="relative z-10 text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                   <TrendingUp size={20} className="text-green-400" />
-                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-green-300">Academic Analytics</span>
+                   {/* <TrendingUp size={20} className="text-green-400" /> */}
+                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Academic Analytics</span>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter leading-none">Your Performance</h2>
-                <p className="text-green-300 font-bold text-sm uppercase tracking-[0.2em] mt-3">{data.SessionName}</p>
-                {hasDexieData && (
+                <h2 className="text-4xl md:text-4xl font-black uppercase italic tracking-tighter leading-none">Your Performance</h2>
+                <p className="text-white font-bold text-sm uppercase tracking-[0.2em] mt-3">{data.SessionName}</p>
+                {/* {hasDexieData && (
                   <div className="mt-6 flex items-center justify-center md:justify-start gap-2 bg-white/10 px-4 py-2 rounded-full border border-white/10 w-fit backdrop-blur-md">
                     <ShieldCheck size={16} className="text-green-400" />
                     <span className="text-[10px] font-black uppercase tracking-tighter">See Overall Performance</span>
                   </div>
-                )}
+                )} */}
               </div>
               <div className="relative z-10 bg-white/5 p-6 rounded-[2rem] text-center min-w-[260px] border border-white/10 mt-8 md:mt-0 backdrop-blur-sm">
                 <p className="text-[12px] font-bold uppercase opacity-50 tracking-[0.2em] mb-2">Average Score</p>
