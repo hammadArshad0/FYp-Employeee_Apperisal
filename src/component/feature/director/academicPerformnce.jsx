@@ -122,13 +122,15 @@ function AcademicPerformance() {
   };
 
   // Scoring Logic (30 points total: Std 10, Peer 10, Dexie 10)
-  const calculateTotal = (t) => {
-    const sScore = Number(t.StudentAverage) || 0;
-    const pScore = Number(t.PeerAverage) || 0;
-    const dScore = dexieScores[t.TeacherID || t.Name] || 0;
-    const total = sScore + pScore + dScore;
-    return Math.round((total / 30) * 100);
-  };
+// Scoring Logic update karo — CHR bhi include karo (40 points total)
+const calculateTotal = (t) => {
+  const sScore = Number(t.StudentAverage) || 0;
+  const pScore = Number(t.PeerAverage) || 0;
+  const dScore = dexieScores[t.TeacherID || t.Name] || 0;
+  const cScore = Number(t.ChrAverage) || 0;  // ✅ CHR add
+  const total = sScore + pScore + dScore + cScore;
+  return Math.round((total / 40) * 100); // ✅ 40 points total ab
+};
 
   const getGraphData = () => {
     return teachersData.map(t => ({
@@ -290,6 +292,7 @@ function AcademicPerformance() {
                       <MetricBar label="Student Evaluation" value={(Number(t.StudentAverage) / 10) * 100} />
                       <MetricBar label="Peer Evaluation" value={(Number(t.PeerAverage) / 10) * 100} />
                       <MetricBar label="Confidential Evaluation" value={(dexieVal / 10) * 100}  />
+                      <MetricBar label="CHR Report" value={(Number(t.ChrAverage) / 10) * 100}  />
                       {/* isDexie={hasDexie} */}
                     </div>
 

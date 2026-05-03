@@ -134,24 +134,50 @@ const AdminUploadPanel = () => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Excel file validation (Optional but good practice)
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    if (fileExtension !== 'xlsx' && fileExtension !== 'xls') {
+        alert("Sirf Excel files (.xlsx, .xls) allowed hain!");
+        event.target.value = "";
+        return;
+    }
+
     setLoadingChr(true);
     const formData = new FormData();
+    
+    // Key ka naam "file" hi rakhein kyunke backend par httpRequest.Files[0] isi ko pick karega
     formData.append("file", file);
 
     try {
-      const response = await DataService.post("ClassReport/UploadExcel", formData);
-      alert(response.data || "CHR Report uploaded successfully!");
-      addUploadedFile(file.name, "CHR Report", "success", response.data || "Uploaded successfully");
+      // Endpoint ko humare naye Controller path "api/CHR/upload" se update kiya
+      const response = await DataService.post("CHR/upload", formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data'
+          }
+      });
+
+      // Agar backend se complex object aa raha hai (e.g. { Message: "...", Count: 5 })
+      const successMsg = response.data.Message || "CHR Report uploaded successfully!";
+      const uploadedCount = response.data.Count ? ` (${response.data.Count} records)` : "";
+      
+      alert(successMsg + uploadedCount);
+      
+      addUploadedFile(file.name, "CHR Report", "success", successMsg);
     } catch (err) {
       console.error("CHR Upload Error:", err);
-      alert(err.response?.data || "Error uploading CHR report");
-      addUploadedFile(file.name, "CHR Report", "error", err.response?.data || "Upload failed");
+      
+      // Error message handle karna
+      const errorMsg = typeof err.response?.data === 'string' 
+        ? err.response.data 
+        : err.response?.data?.ExceptionMessage || "Error uploading CHR report";
+        
+      alert(errorMsg);
+      addUploadedFile(file.name, "CHR Report", "error", errorMsg);
     } finally {
       setLoadingChr(false);
-      event.target.value = "";
+      event.target.value = ""; // Input clear taake same file dobara upload ho sakay
     }
-  };
-
+};
   const handleEnrollmentUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;

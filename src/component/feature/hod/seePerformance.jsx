@@ -258,17 +258,17 @@ const SeePerformance = () => {
                         <h4 className="text-lg font-black text-slate-800 uppercase italic tracking-tighter truncate">
                           {sub.SubName}
 
-                          {isConfidential(sub.SubName) && hasDexieData && (
-                            <span className="ml-2 text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-black normal-case not-italic">
-                              Local Data Applied
-                            </span>
+                          {/* {isConfidential(sub.SubName) && hasDexieData && (
+                            // <span className="ml-2 text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-black normal-case not-italic">
+                            //   Local Data Applied
+                            // </span>
 
-                          )}
-                         {sub.IsSociety &&  (
+                          )} */}
+                         {/* {sub.IsSociety &&  (
                             <span className="ml-2 text-[9px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-black normal-case not-italic">
                               Society
                             </span>
-                          )}
+                          )} */}
                         </h4>
                         <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner mt-3">
                           <div className={`h-full ${barColor} transition-all duration-1000`} style={{ width: `${finalPerc}%` }} />

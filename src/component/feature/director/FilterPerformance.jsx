@@ -16,7 +16,7 @@ function FilterPerformance() {
   const [selectedDept, setSelectedDept] = useState('All');
   const [selectedCourse, setSelectedCourse] = useState('All');
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -53,7 +53,6 @@ function FilterPerformance() {
     if (selectedSession) loadPerformanceData();
   }, [selectedSession, selectedDept, selectedCourse]);
 
-  // ✅ Renamed function to avoid React mapping conflict
   const loadPerformanceData = async () => {
     setLoading(true);
     try {
@@ -70,7 +69,7 @@ function FilterPerformance() {
           .toArray();
         if (records.length > 0) {
           const avg = records.reduce((sum, r) => sum + r.score, 0) / records.length;
-          dexieMap[teacher.TeacherID] = avg; // 0-4 scale
+          dexieMap[teacher.TeacherID] = avg;
         }
       }
       setDexieScores(dexieMap);
@@ -82,7 +81,6 @@ function FilterPerformance() {
     }
   };
 
-  // ✅ Synchronous function for calculating overall score dynamically
   const calculateOverall = (teacher) => {
     let totalAchieved = 0;
     let totalWeight = 0;
@@ -120,6 +118,32 @@ function FilterPerformance() {
     return 0;
   };
 
+  // ✅ CHR percentage nikalo KPIWeights se
+  const getChrPerc = (teacher) => {
+    const kpiWeights = teacher.KPIWeights || [];
+    const chrKpi = kpiWeights.find(k =>
+      (k.SubName || '').toLowerCase().includes('chr') ||
+      (k.SubName || '').toLowerCase().includes('class held report')
+    );
+    if (chrKpi) {
+      return Math.min(100, Math.round(((chrKpi.Score || 0) / chrKpi.MaxScale) * 100));
+    }
+    // ✅ Fallback — backend se ChrAvgScore directly use karo
+    return Math.min(100, Math.round(((teacher.ChrAvgScore || 0) / 5.0) * 100));
+  };
+
+  // ✅ Society percentage nikalo KPIWeights se
+  const getSocietyPerc = (teacher) => {
+    const kpiWeights = teacher.KPIWeights || [];
+    const societyKpi = kpiWeights.find(k =>
+      (k.SubName || '').toLowerCase().includes('society')
+    );
+    if (societyKpi) {
+      return Math.min(100, Math.round(((societyKpi.Score || 0) / societyKpi.MaxScale) * 100));
+    }
+    return 0;
+  };
+
   const getBarColor = (value) => {
     if (value >= 80) return '#16a34a';
     if (value >= 60) return '#f97316';
@@ -131,7 +155,7 @@ function FilterPerformance() {
     return [...performanceData]
       .map(d => ({
         name: d.TeacherName.split(' ').slice(0, 2).join(' '),
-        performance: calculateOverall(d), // ✅ Using sync function here
+        performance: calculateOverall(d),
       }))
       .sort((a, b) => b.performance - a.performance);
   };
@@ -148,15 +172,15 @@ function FilterPerformance() {
           </h1>
           <p className="text-gray-500 font-medium">Teacher Performance with Kpi score.</p>
         </div>
-       <button
-      className="border border-black-2 text-black-2 px-4 py-2 rounded-full font-bold text-sm hover:bg-gray-100 transition-colors"
-     onClick={() => navigate("/director-dashboard/filter-performance/comparison")}
-    >
-      Open Comparison
-    </button>
+        <button
+          className="border border-black-2 text-black-2 px-4 py-2 rounded-full font-bold text-sm hover:bg-gray-100 transition-colors"
+          onClick={() => navigate("/director-dashboard/filter-performance/comparison")}
+        >
+          Open Comparison
+        </button>
       </div>
 
-      {/* Filters Bar */}
+      {/* Filters */}
       <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
           <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Active Session</label>
@@ -166,7 +190,7 @@ function FilterPerformance() {
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Departement</label>
+          <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Department</label>
           <select value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)}
             className="w-full bg-gray-50 border-none p-4 rounded-2xl font-bold text-gray-700 focus:ring-2 focus:ring-green-500 transition-all outline-none">
             {departments.map((d, i) => <option key={i} value={d}>{d}</option>)}
@@ -201,9 +225,6 @@ function FilterPerformance() {
                     <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">
                       Top Performance Overview
                     </h3>
-                    {/* <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                      Sorted by Aggregate Weighted Score (Including Local Data)
-                    </p> */}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -261,23 +282,28 @@ function FilterPerformance() {
               </div>
             ) : (
               performanceData.map((data, index) => {
-                const hasDexie = dexieScores[data.TeacherID] !== undefined;
-                const overallPerc = calculateOverall(data); // ✅ Using sync function here
+                const overallPerc = calculateOverall(data);
                 const confPerc = getConfPerc(data);
+                const chrPerc = getChrPerc(data);         // ✅ CHR percentage
+                const societyPerc = getSocietyPerc(data); // ✅ Society percentage
 
-                // Student % from backend
                 const studentPerc = Math.min(100, Math.round(data.StudentPercentage || 0));
-                // Peer % from backend
                 const peerPerc = Math.min(100, Math.round(data.PeerPercentage || 0));
-                // KPI % — non-confidential SubKPIs ka average
+
+                // KPI % — society aur confidential/student/peer exclude
                 const kpiWeights = data.KPIWeights || [];
-                const nonConfKpis = kpiWeights.filter(k => !(k.SubName || '').toLowerCase().includes('confidential')
-                  && !(k.SubName || '').toLowerCase().includes('student')
-                  && !(k.SubName || '').toLowerCase().includes('peer'));
+                const nonConfKpis = kpiWeights.filter(k => {
+                  const name = (k.SubName || '').toLowerCase();
+                  return !name.includes('confidential')
+                    && !name.includes('student')
+                    && !name.includes('peer')
+                    && !name.includes('society')   // ✅ society exclude
+                    && !name.includes('chr');       // ✅ chr exclude
+                });
                 let kpiPerc = 0;
                 if (nonConfKpis.length > 0) {
-                  const kpiEarned = nonConfKpis.reduce((sum, k) => sum + ((k.Score || 0) / k.MaxScale) * k.Weight, 0); // ✅ Fixed MaxScale calculation
-                  const kpiMax   = nonConfKpis.reduce((sum, k) => sum + k.Weight, 0);
+                  const kpiEarned = nonConfKpis.reduce((sum, k) => sum + ((k.Score || 0) / k.MaxScale) * k.Weight, 0);
+                  const kpiMax = nonConfKpis.reduce((sum, k) => sum + k.Weight, 0);
                   kpiPerc = kpiMax > 0 ? Math.min(100, Math.round((kpiEarned / kpiMax) * 100)) : 0;
                 }
 
@@ -304,10 +330,12 @@ function FilterPerformance() {
                           <GraduationCap size={14} />
                           <span className="text-xs font-bold uppercase tracking-widest">{data.Department}</span>
                         </div>
-                        {hasDexie && (
-                          <div className="mt-2 flex items-center gap-1.5 bg-green-50 border border-green-200 px-3 py-1 rounded-full w-fit">
-                            {/* <ShieldCheck size={12} className="text-green-600" /> */}
-                            {/* <span className="text-[9px] font-black text-green-700 uppercase tracking-wider">Local Data Applied</span> */}
+
+                        {/* ✅ Society Member Badge — sirf tab show ho */}
+                        {data.IsSocietyMember && (
+                          <div className="mt-2 flex items-center gap-1.5 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full w-fit">
+                            <ShieldCheck size={12} className="text-purple-600" />
+                            <span className="text-[9px] font-black text-purple-700 uppercase tracking-wider">Society Member</span>
                           </div>
                         )}
                       </div>
@@ -329,10 +357,17 @@ function FilterPerformance() {
                     </div>
 
                     <div className="space-y-6">
-                      <MetricBar label="Student Evaluation"     value={studentPerc} />
-                      <MetricBar label="Peer Review"            value={peerPerc} />
-                      <MetricBar label="Confidential Eval"      value={confPerc}  />
-                      <MetricBar label="KPI Compliance"         value={kpiPerc} />
+                      <MetricBar label="Student Evaluation" value={studentPerc} />
+                      <MetricBar label="Peer Review"        value={peerPerc} />
+                      <MetricBar label="Confidential Eval"  value={confPerc} />
+                      <MetricBar label="CHR Report"         value={chrPerc} />  {/* ✅ Har teacher ko */}
+
+                      {/* ✅ Society — sirf Society Member ko dikhao */}
+                      {data.IsSocietyMember && (
+                        <MetricBar label="Society Management" value={societyPerc} />
+                      )}
+
+                      <MetricBar label="KPI Compliance"    value={kpiPerc} />
                     </div>
                   </div>
                 );
