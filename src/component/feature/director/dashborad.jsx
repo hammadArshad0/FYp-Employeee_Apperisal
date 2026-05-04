@@ -81,7 +81,7 @@ const DirectorDashboard = () => {
         <div className="relative z-10">
           <h2 className="text-3xl font-black mb-2 tracking-tight">Director Dashboard</h2>
           <p className="text-green-50 text-lg opacity-90 font-medium">
-            Welcome, {user.name}. Employee performance Apperisal.
+            Welcome, Dr.Jamil Sawar. BIIT Employee performance Apperisal.
           </p>
         </div>
 

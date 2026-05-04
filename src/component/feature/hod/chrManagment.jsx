@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import DataService from '../../../services/axios';
 
-// Dono parameters lo
 const calcScore = (lateIn = 0, leftEarly = 0) => {
   const total = lateIn + leftEarly;
   if (total >= 10) return 0;
@@ -70,17 +69,11 @@ const ConfirmDialog = ({ message, onConfirm, onCancel, loading }) => (
       <div style={{ padding: '1.5rem' }}>
         <p style={{ margin: '0 0 1.5rem', fontSize: 14, color: '#374151', lineHeight: 1.6 }}>{message}</p>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            onClick={onCancel}
-            style={{ flex: 1, background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '11px 0', fontWeight: 700, fontSize: 13, color: '#475569', cursor: 'pointer' }}
-          >
+          <button onClick={onCancel} style={{ flex: 1, background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '11px 0', fontWeight: 700, fontSize: 13, color: '#475569', cursor: 'pointer' }}>
             Cancel
           </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            style={{ flex: 1, background: loading ? '#fca5a5' : '#dc2626', border: 'none', borderRadius: 8, padding: '11px 0', fontWeight: 700, fontSize: 13, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-          >
+          <button onClick={onConfirm} disabled={loading}
+            style={{ flex: 1, background: loading ? '#fca5a5' : '#dc2626', border: 'none', borderRadius: 8, padding: '11px 0', fontWeight: 700, fontSize: 13, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             {loading ? <><Loader2 size={14} className="animate-spin" /> Deleting...</> : <><Trash2 size={14} /> Delete</>}
           </button>
         </div>
@@ -93,10 +86,10 @@ const ConfirmDialog = ({ message, onConfirm, onCancel, loading }) => (
 // Edit Modal
 // ══════════════════════════════════════════════════════════════════════
 const EditModal = ({ row, onClose, onSaved }) => {
-  const [lateIn, setLateIn] = useState(row.LateIn ?? 0);
+  const [lateIn,    setLateIn]    = useState(row.LateIn    ?? 0);
   const [leftEarly, setLeftEarly] = useState(row.LeftEarly ?? 0);
-  const [remarks, setRemarks] = useState(row.Remarks || '');
-  const [saving, setSaving] = useState(false);
+  const [remarks,   setRemarks]   = useState(row.Remarks   || '');
+  const [saving,    setSaving]    = useState(false);
 
   const handleSave = async () => {
     setSaving(true);
@@ -130,8 +123,8 @@ const EditModal = ({ row, onClose, onSaved }) => {
               style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '10px 12px', fontSize: 14, fontWeight: 700, color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} />
             <div style={{ marginTop: 8, background: '#f8fafc', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Preview:</span>
-              <ScorePill score={calcScore(lateIn)} />
-              <StatusPill status={computeStatus(lateIn)} />
+              <ScorePill score={calcScore(lateIn, leftEarly)} />
+              <StatusPill status={computeStatus(lateIn, leftEarly)} />
             </div>
           </div>
           <div>
@@ -161,21 +154,43 @@ const EditModal = ({ row, onClose, onSaved }) => {
 // Main Component
 // ══════════════════════════════════════════════════════════════════════
 const CHRManagement = () => {
-  const [reports, setReports] = useState([]);
-  const [details, setDetails] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [reports,       setReports]       = useState([]);
+  const [details,       setDetails]       = useState(null);
+  const [loading,       setLoading]       = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [activeId, setActiveId] = useState(null);
-  const [editRow, setEditRow] = useState(null);
+  const [activeId,      setActiveId]      = useState(null);
+  const [editRow,       setEditRow]       = useState(null);
 
-  // Delete state
-  const [confirm, setConfirm] = useState(null); // { type: 'batch'|'row', id, message }
+  // ── Session state ──────────────────────────────────────────────────
+  const [sessions,        setSessions]        = useState([]);
+  const [selectedSession, setSelectedSession] = useState('');
+
+  // ── Delete state ───────────────────────────────────────────────────
+  const [confirm,  setConfirm]  = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchSummary = async () => {
+  // ── Sessions fetch ─────────────────────────────────────────────────
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const res = await DataService.get('session/list');
+        setSessions(res.data || []);
+      } catch (err) {
+        console.error('Sessions fetch error', err);
+      }
+    };
+    fetchSessions();
+  }, []);
+
+  // ── Dashboard fetch ────────────────────────────────────────────────
+  const fetchSummary = async (sessionId = '') => {
     setLoading(true);
+    setDetails(null);
     try {
-      const res = await DataService.get('/CHR/GetHODDashboard');
+      const url = sessionId
+        ? `/CHR/GetHODDashboard?sessionID=${sessionId}`
+        : '/CHR/GetHODDashboard';
+      const res = await DataService.get(url);
       setReports(res.data || []);
     } catch (err) {
       console.error('Dashboard error', err);
@@ -186,18 +201,20 @@ const CHRManagement = () => {
 
   useEffect(() => { fetchSummary(); }, []);
 
+  const handleSessionChange = (e) => {
+    const val = e.target.value;
+    setSelectedSession(val);
+    fetchSummary(val);
+  };
+
+  // ── View detail ────────────────────────────────────────────────────
   const handleView = async (reportId) => {
     setActiveId(reportId);
     setDetailLoading(true);
     try {
-      const res = await DataService.get(`/CHR/GetReportById/${reportId}`);
+      const res  = await DataService.get(`/CHR/GetReportById/${reportId}`);
       const data = Array.isArray(res.data) ? res.data : [res.data];
-
-      if (data.length === 0) {
-        alert('Is report mein koi record nahi mila.');
-        return; // ← detail screen mat kholo
-      }
-
+      if (data.length === 0) { alert('no record .'); return; }
       setDetails(data);
     } catch (err) {
       alert('Error: ' + (err.response?.data?.Message || 'Server Error'));
@@ -207,24 +224,16 @@ const CHRManagement = () => {
     }
   };
 
-  const handleBack = () => setDetails(null);
+  const handleBack  = () => setDetails(null);
   const handleSaved = (updated) => setDetails(prev => prev.map(d => d.id === updated.id ? updated : d));
 
   // ── Delete handlers ────────────────────────────────────────────────
   const askDeleteBatch = (reportId, date) => {
-    setConfirm({
-      type: 'batch',
-      id: reportId,
-      message: `"${formatDate(date)}" report delete!`
-    });
+    setConfirm({ type: 'batch', id: reportId, message: `"${formatDate(date)}"  report delete ` });
   };
 
   const askDeleteRow = (row) => {
-    setConfirm({
-      type: 'row',
-      id: row.id,
-      message: `${row.TeacherName} (${row.CourseCode}) ka record delete ho jayega. Yeh action undo nahi ho sakta!`
-    });
+    setConfirm({ type: 'row', id: row.id, message: `${row.TeacherName} (${row.CourseCode}) record will be delete.` });
   };
 
   const handleConfirmDelete = async () => {
@@ -238,7 +247,6 @@ const CHRManagement = () => {
         await DataService.delete(`/CHR/DeleteRow/${confirm.id}`);
         setDetails(prev => {
           const updated = prev.filter(d => d.id !== confirm.id);
-          // Agar saare records delete ho gaye to back chale jao
           return updated.length > 0 ? updated : null;
         });
       }
@@ -256,12 +264,7 @@ const CHRManagement = () => {
 
       {/* Confirm Dialog */}
       {confirm && (
-        <ConfirmDialog
-          message={confirm.message}
-          loading={deleting}
-          onConfirm={handleConfirmDelete}
-          onCancel={() => setConfirm(null)}
-        />
+        <ConfirmDialog message={confirm.message} loading={deleting} onConfirm={handleConfirmDelete} onCancel={() => setConfirm(null)} />
       )}
 
       {/* Edit Modal */}
@@ -280,13 +283,29 @@ const CHRManagement = () => {
             </p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+
+          {/* ── Session Dropdown ── */}
+          <select
+            value={selectedSession}
+            onChange={handleSessionChange}
+            style={{ border: '1.5px solid #bbf7d0', borderRadius: 8, padding: '7px 14px', fontSize: 13, fontWeight: 700, color: '#15803d', background: '#f0fdf4', cursor: 'pointer', outline: 'none', minWidth: 180 }}
+          >
+            <option value="">All Sessions</option>
+            {sessions.map(s => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+
+          {/* Date badge */}
           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Calendar size={14} color="#16a34a" />
             <span style={{ fontSize: 12, fontWeight: 700, color: '#15803d' }}>
               {new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
           </div>
+
           {details && (
             <button onClick={handleBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e2e8f0', padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, color: '#475569', cursor: 'pointer' }}>
               <ArrowLeft size={14} /> Back to Reports
@@ -315,7 +334,8 @@ const CHRManagement = () => {
               <div style={{ height: 5, background: 'linear-gradient(90deg,#16a34a,#4ade80)' }} />
 
               <div style={{ padding: '1.4rem 1.3rem 1.1rem', flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {/* Icon + Delete row */}
+
+                {/* Icon + Batch Delete */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ background: '#f0fdf4', padding: 10, borderRadius: 12, display: 'flex' }}>
@@ -323,15 +343,14 @@ const CHRManagement = () => {
                     </div>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>CHR Report</span>
                   </div>
-                  {/* ── Batch Delete button ── */}
                   <button
                     onClick={() => askDeleteBatch(r.ReportId, r.ReportDate)}
-                    style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#e11d48', transition: 'all .15s' }}
+                    // style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#e11d48', transition: 'all .15s' }}
                     onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
                     title="Delete entire report"
                   >
-                    {/* <Trash2 size={13} /> Delete */}
+                    {/* <Trash2 size={13} /> */}
                   </button>
                 </div>
 
@@ -344,30 +363,19 @@ const CHRManagement = () => {
                   </div>
                 </div>
 
-                {/* Upload Time */}
-                {/* <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: 12, padding: '12px 14px' }}>
-                  <Clock size={18} color="#9333ea" />
-                  <div>
-                    <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: '#c4b5fd', textTransform: 'uppercase' }}>Uploaded At</p>
-                    <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#7e22ce' }}>{formatTime(r.ReportDate)}</p>
+                {/* Session Name badge */}
+                {r.SessionName && r.SessionName !== 'N/A' && (
+                  <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '8px 12px', fontSize: 12, fontWeight: 700, color: '#1d4ed8' }}>
+                    📅 {r.SessionName}
                   </div>
-                </div> */}
-
-                {/* Department */}
-                {/* <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 12, padding: '12px 14px' }}>
-                  <Building2 size={18} color="#2563eb" />
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: '#93c5fd', textTransform: 'uppercase' }}>Department</p>
-                    <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1d4ed8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.Department || 'N/A'}</p>
-                  </div>
-                </div> */}
+                )}
 
                 {/* Stats */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {[
-                    { label: 'Total', val: r.TotalClasses, color: '#0f172a', bg: '#f8fafc' },
+                    { label: 'Total',     val: r.TotalClasses,     color: '#0f172a', bg: '#f8fafc' },
                     { label: 'Cancelled', val: r.CancelledClasses, color: r.CancelledClasses > 0 ? '#dc2626' : '#0f172a', bg: r.CancelledClasses > 0 ? '#fff8f8' : '#f8fafc' },
-                    { label: 'Late', val: r.LateTeachers, color: '#f59e0b', bg: '#f8fafc' },
+                    { label: 'Late',      val: r.LateTeachers,     color: '#f59e0b', bg: '#f8fafc' },
                     { label: 'Avg Score', val: r.AvgScore?.toFixed(1), color: '#16a34a', bg: '#f8fafc' },
                   ].map(s => (
                     <div key={s.label} style={{ background: s.bg, borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
@@ -392,7 +400,9 @@ const CHRManagement = () => {
           )) : (
             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem 2rem', background: '#fff', borderRadius: 16, border: '2px dashed #e2e8f0' }}>
               <ClipboardCheck size={36} color="#cbd5e1" style={{ marginBottom: 12 }} />
-              <p style={{ color: '#94a3b8', fontWeight: 700, margin: 0 }}>No CHR Reports found.</p>
+              <p style={{ color: '#94a3b8', fontWeight: 700, margin: 0 }}>
+                {selectedSession ? 'Is session mein koi CHR report nahi mili.' : 'No CHR Reports found.'}
+              </p>
             </div>
           )}
         </div>
@@ -420,9 +430,9 @@ const CHRManagement = () => {
                 <span style={{ background: '#f1f5f9', padding: '5px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800, color: '#64748b' }}>
                   {details.length} records
                 </span>
-                {details.filter(d => d.LateIn >= 10).length > 0 && (
+                {details.filter(d => (d.LateIn + (d.LeftEarly ?? 0)) >= 10).length > 0 && (
                   <span style={{ background: '#fee2e2', padding: '5px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800, color: '#991b1b' }}>
-                    {details.filter(d => d.LateIn >= 10).length} cancelled
+                    {details.filter(d => (d.LateIn + (d.LeftEarly ?? 0)) >= 10).length} cancelled
                   </span>
                 )}
               </div>
@@ -445,8 +455,8 @@ const CHRManagement = () => {
                 </thead>
                 <tbody>
                   {details.map((d, i) => {
-                  const score  = calcScore(d.LateIn, d.LeftEarly);
-                  const status = computeStatus(d.LateIn, d.LeftEarly, d.Status);
+                    const score  = calcScore(d.LateIn, d.LeftEarly);
+                    const status = computeStatus(d.LateIn, d.LeftEarly, d.Status);
                     return (
                       <tr key={i}
                         style={{ borderTop: '1px solid #f1f5f9', background: status === 'Cancelled' ? '#fff8f8' : i % 2 === 0 ? '#fff' : '#fafafa', transition: 'background .15s' }}
@@ -473,19 +483,7 @@ const CHRManagement = () => {
                         </td>
                         <td style={{ padding: '11px 14px', textAlign: 'center' }}><ScorePill score={score} /></td>
                         <td style={{ padding: '11px 14px' }}><StatusPill status={status} /></td>
-                        <td
-                          style={{
-                            padding: '11px 14px',
-                            color: d.Remarks ? 'black' : '#94a3b8',
-                            fontSize: d.Remarks ? '14px' : '12px',
-                            fontStyle: d.Remarks ? 'normal' : 'italic',
-                            fontWeight: d.Remarks ? 'bold' : 'normal',
-                            maxWidth: 160,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
+                        <td style={{ padding: '11px 14px', color: d.Remarks ? 'black' : '#94a3b8', fontSize: d.Remarks ? '14px' : '12px', fontStyle: d.Remarks ? 'normal' : 'italic', fontWeight: d.Remarks ? 'bold' : 'normal', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {d.Remarks || 'No remarks'}
                         </td>
 
@@ -497,17 +495,17 @@ const CHRManagement = () => {
                               style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#2563eb', transition: 'all .15s' }}
                               onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.color = '#fff'; }}
                               onMouseLeave={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.color = '#2563eb'; }}
-                            > */}
-                              {/* <Pencil size={12} /> Edit */}
-                            {/* </button> */}
+                            >
+                              <Pencil size={12} /> Edit
+                            </button> */}
                             {/* <button
                               onClick={() => askDeleteRow(d)}
                               style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#e11d48', transition: 'all .15s' }}
                               onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; }}
                               onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
-                            > */}
-                              {/* <Trash2 size={12} /> Del */}
-                            {/* </button> */}
+                            >
+                              <Trash2 size={12} /> Del
+                            </button> */}
                           </div>
                         </td>
                       </tr>

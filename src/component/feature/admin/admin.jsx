@@ -98,7 +98,7 @@ const AdminUploadPanel = () => {
       addUploadedFile(file.name, "Teacher", "success", response.data || "Uploaded successfully");
     } catch (err) {
       console.error("Teacher Upload Error:", err);
-      alert( err.response?.data?.message || err.response?.data|| "Error uploading teachers");
+      alert(err.response?.data?.message || err.response?.data || "Error uploading teachers");
       addUploadedFile(file.name, "Teacher", "error", err.response?.data || "Upload failed");
     } finally {
       setLoadingTeacher(false);
@@ -130,54 +130,58 @@ const AdminUploadPanel = () => {
     }
   };
 
+  // ── CHR Upload — Session validation + sessionID append ──────
   const handleChrUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Excel file validation (Optional but good practice)
-    const fileExtension = file.name.split('.').pop().toLowerCase();
-    if (fileExtension !== 'xlsx' && fileExtension !== 'xls') {
-        alert("Sirf Excel files (.xlsx, .xls) allowed hain!");
-        event.target.value = "";
-        return;
+    // 1. Session check
+    if (!selectedSession) {
+      alert("Please select a session before uploading CHR Report!");
+      event.target.value = "";
+      return;
+    }
+
+    // 2. Excel file validation
+    const fileExtension = file.name.split(".").pop().toLowerCase();
+    if (fileExtension !== "xlsx" && fileExtension !== "xls") {
+      alert("Sirf Excel files (.xlsx, .xls) allowed hain!");
+      event.target.value = "";
+      return;
     }
 
     setLoadingChr(true);
     const formData = new FormData();
-    
-    // Key ka naam "file" hi rakhein kyunke backend par httpRequest.Files[0] isi ko pick karega
     formData.append("file", file);
+    formData.append("sessionID", selectedSession); // ← Session backend ko bhejo
 
     try {
-      // Endpoint ko humare naye Controller path "api/CHR/upload" se update kiya
       const response = await DataService.post("CHR/upload", formData, {
-          headers: {
-              'Content-Type': 'multipart/form-data'
-          }
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Agar backend se complex object aa raha hai (e.g. { Message: "...", Count: 5 })
       const successMsg = response.data.Message || "CHR Report uploaded successfully!";
       const uploadedCount = response.data.Count ? ` (${response.data.Count} records)` : "";
-      
-      alert(successMsg + uploadedCount);
-      
+      const sessionName = response.data.SessionName ? ` | Session: ${response.data.SessionName}` : "";
+
+      alert(successMsg + uploadedCount + sessionName);
       addUploadedFile(file.name, "CHR Report", "success", successMsg);
     } catch (err) {
       console.error("CHR Upload Error:", err);
-      
-      // Error message handle karna
-      const errorMsg = typeof err.response?.data === 'string' 
-        ? err.response.data 
-        : err.response?.data?.ExceptionMessage || "Error uploading CHR report";
-        
+
+      const errorMsg =
+        typeof err.response?.data === "string"
+          ? err.response.data
+          : err.response?.data?.ExceptionMessage || "Error uploading CHR report";
+
       alert(errorMsg);
       addUploadedFile(file.name, "CHR Report", "error", errorMsg);
     } finally {
       setLoadingChr(false);
-      event.target.value = ""; // Input clear taake same file dobara upload ho sakay
+      event.target.value = "";
     }
-};
+  };
+
   const handleEnrollmentUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -247,7 +251,7 @@ const AdminUploadPanel = () => {
             <div className="flex flex-col items-center text-center">
               <div className="bg-purple-100 p-4 rounded-full mb-4"><UserCheck className="text-purple-600" size={32} /></div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Upload Teacher</h3>
-              <div className="mb-3 h-[38px]"></div> {/* Spacer for alignment */}
+              <div className="mb-3 h-[38px]"></div>
               <button onClick={() => teacherInputRef.current.click()} disabled={loadingTeacher} className="w-full bg-[#108944] text-white py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:opacity-70">
                 {loadingTeacher ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                 {loadingTeacher ? "Processing..." : "Upload Now"}
@@ -268,12 +272,16 @@ const AdminUploadPanel = () => {
             </div>
           </div>
 
-          {/* CHR Card */}
+          {/* CHR Card — Session dropdown + no spacer */}
           <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
             <div className="flex flex-col items-center text-center">
               <div className="bg-green-100 p-4 rounded-full mb-4"><FileText className="text-[#108944]" size={32} /></div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">CHR Report</h3>
-              <div className="mb-3 h-[38px]"></div>
+              <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)} className="mb-3 w-full p-2 border border-gray-300 rounded-lg text-sm">
+                <option value="">Select Session</option>
+                {sessions.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
+              </select>
+              {/* ← Spacer hataya, directly button */}
               <button onClick={() => chrInputRef.current.click()} disabled={loadingChr} className="w-full bg-[#108944] text-white py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:opacity-70">
                 {loadingChr ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                 {loadingChr ? "Processing..." : "Upload Now"}

@@ -65,7 +65,7 @@ const Dashboard = () => {
       <div className="bg-green-700 rounded-2xl p-8 text-white shadow-lg">
         <h2 className="text-3xl font-black mb-2 tracking-tight">HOD Dashboard</h2>
         <p className="text-green-50 text-lg opacity-90">
-          Welcome ,{user.name} Employee Performance Apperisal.
+          Welcome ,DR.Munir. BIIT Employee Performance Apperisal.
         </p>
       </div>
 

@@ -291,11 +291,11 @@ const SeePerformanceTeacher = () => {
                         </p>
                         <h4 className="text-lg font-black text-slate-800 uppercase italic tracking-tighter truncate">
                           {sub.SubName}
-                          {isConf && hasDexieData && (
+                          {/* {isConf && hasDexieData && (
                             <span className="ml-2 text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-black normal-case not-italic">
                               Local Data
                             </span>
-                          )}
+                          )} */}
                         </h4>
                         <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner mt-3">
                           <div

@@ -44,6 +44,9 @@ import AcademicPerformance from './component/feature/director/academicPerformnce
 import TeacherQuestionsRatingSee from './component/feature/director/teacherQuestionsRatingSee';
 import ChairpersonMentorEval from './component/feature/teacher/ChairpersonMentorEval';
 import HODChairpersonEval from './component/feature/hod/HODChairpersonEval';
+import MyPerformanceAcdemic from './component/feature/teacher/myPerformanceAcdemic';
+import CourseComparison from './component/feature/teacher/courseComparison';
+import QuestionRatings from './component/feature/teacher/Questionratings';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -116,6 +119,9 @@ const App = () => {
           <Route path="peer" element={<PeerEvaluation />} />
           <Route path="evaluate/:teacherId/:courseCode" element={<PeerEvaluationForm />} />
           <Route path="society-evaluation" element={<ChairpersonMentorEval />} />
+          <Route path="acdemic-performance" element={<MyPerformanceAcdemic />} />
+          <Route path="acdemic-performance/course-comparison" element={<CourseComparison />} />  
+          <Route path="acdemic-performance/question-ratings" element={<QuestionRatings />} />
         </Route>
 
         {/* --- STUDENT ROUTES --- */}
