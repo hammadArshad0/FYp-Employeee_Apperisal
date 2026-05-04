@@ -18,7 +18,10 @@ const StudentDashboard = () => {
     "26-ARID-001",
     "26-ARID-002",
     "26-ARID-006",
-     "26-ARID-005"
+     "26-ARID-005",
+     "26-Arid-4001",
+     "26-Arid-4002",
+     "26-Arid-4003"
   ];
 
   // 3. Logic: Compare with case-insensitivity and trim spaces

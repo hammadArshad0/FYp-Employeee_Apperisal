@@ -498,14 +498,14 @@ const CHRManagement = () => {
                             >
                               <Pencil size={12} /> Edit
                             </button> */}
-                            {/* <button
+                            <button
                               onClick={() => askDeleteRow(d)}
                               style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#e11d48', transition: 'all .15s' }}
                               onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; }}
                               onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
                             >
                               <Trash2 size={12} /> Del
-                            </button> */}
+                            </button>
                           </div>
                         </td>
                       </tr>
