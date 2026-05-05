@@ -47,6 +47,7 @@ import HODChairpersonEval from './component/feature/hod/HODChairpersonEval';
 import MyPerformanceAcdemic from './component/feature/teacher/myPerformanceAcdemic';
 import CourseComparison from './component/feature/teacher/courseComparison';
 import QuestionRatings from './component/feature/teacher/Questionratings';
+import CourseEvalutionRating from './component/feature/director/CourseEvalutionRating';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -95,6 +96,7 @@ const App = () => {
           <Route path="filter-performance/comparison" element={<ComparisonPage/>} />
           <Route path="academic-performance" element={<AcademicPerformance/>} />
           <Route path="teacher-performance/:id" element={<TeacherQuestionsRatingSee />} />
+          <Route path="course-evaluation" element={<CourseEvalutionRating />} />
         </Route>
 
         {/* --- HOD ROUTES --- */}
@@ -107,6 +109,7 @@ const App = () => {
           <Route path="chr" element={<CHRManagement />} />
           <Route path="societies" element={<SocietyManagement />} />
           <Route path ="society-evaluation" element={<HODChairpersonEval />} />
+
         </Route>
 
         {/* --- TEACHER ROUTES --- */}

@@ -203,27 +203,27 @@ function CourseComparison() {
               </ResponsiveContainer>
             </div>
           </div>
-
+{/* 
           {courses.length >= 2 && (
-            <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-black text-gray-800 mb-1 uppercase tracking-tight">Radar Comparison</h3>
-              <p className="text-xs text-gray-400 mb-6">Shape comparison across all metrics</p>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData}>
-                    <PolarGrid stroke="#f1f5f9" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fontWeight: '900', fill: '#64748b' }} />
-                    {courses.map((c, i) => (
-                      <Radar key={c.CourseCode} name={c.CourseCode} dataKey={c.CourseCode}
-                        stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]}
-                        fillOpacity={0.15} strokeWidth={2} />
-                    ))}
-                    <Legend wrapperStyle={{ fontSize: '11px', fontWeight: '900', paddingTop: '16px' }} />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
+            // <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
+            //   <h3 className="text-lg font-black text-gray-800 mb-1 uppercase tracking-tight">Radar Comparison</h3>
+            //   <p className="text-xs text-gray-400 mb-6">Shape comparison across all metrics</p>
+            //   <div className="h-[280px]">
+            //     <ResponsiveContainer width="100%" height="100%">
+            //       <RadarChart data={radarData}>
+            //         <PolarGrid stroke="#f1f5f9" />
+            //         <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fontWeight: '900', fill: '#64748b' }} />
+            //         {courses.map((c, i) => (
+            //           <Radar key={c.CourseCode} name={c.CourseCode} dataKey={c.CourseCode}
+            //             stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]}
+            //             fillOpacity={0.15} strokeWidth={2} />
+            //         ))}
+            //         <Legend wrapperStyle={{ fontSize: '11px', fontWeight: '900', paddingTop: '16px' }} />
+            //       </RadarChart>
+            //     </ResponsiveContainer>
+            //   </div>
+            // </div>
+          )} */}
 
           <button
             onClick={() => navigate(`/teacher-dashboard/acdemic-performance/question-ratings?session=${selectedSession}`)}

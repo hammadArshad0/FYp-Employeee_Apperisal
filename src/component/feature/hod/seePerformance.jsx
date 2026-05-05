@@ -15,9 +15,30 @@ const SeePerformance = () => {
   const [dexieConfAvg, setDexieConfAvg] = useState(0);
   const [hasDexieData, setHasDexieData] = useState(false);
 
+  // ── State add karo ──
+const [kpiTypes, setKpiTypes] = useState([]);
+const [selectedKpiType, setSelectedKpiType] = useState(''); // '' = All
+
   useEffect(() => {
     DataService.get('/Session/list').then(res => setSessions(res.data || []));
   }, []);
+  // ── Session change hone par KPI types load karo ──
+useEffect(() => {
+    if (selectedSession) {
+      setTeachers([]);
+      setSelectedTeacher('');
+      setKpiTypes([]);
+      setSelectedKpiType('');
+
+      // Teachers load
+      DataService.get(`/Director/GetTeachersBySession/${selectedSession}`)
+        .then(res => setTeachers(res.data || []));
+
+      // ✅ KPI Types load
+      DataService.get(`/Performance/GetKpiTypesBySession/${selectedSession}`)
+        .then(res => setKpiTypes(res.data || []));
+    }
+}, [selectedSession]);
 
   useEffect(() => {
     if (selectedSession) {
@@ -43,7 +64,16 @@ const SeePerformance = () => {
 
     try {
       // ✅ Fixed the API route to match Backend 2's actual RoutePrefix + Route
-      const res = await DataService.get(`/Performance/GetTeacherPerformanceAnalytics/${selectedTeacher}/${selectedSession}`);
+      // const res = await DataService.get(`/Performance/GetTeacherPerformanceAnalytics/${selectedTeacher}/${selectedSession}`);
+      // ── fetchPerformance mein empTypeId bhejo ──
+const res = await DataService.get(
+  `/Performance/GetTeacherPerformanceAnalytics/${selectedTeacher}/${selectedSession}`,
+  {
+   params: {
+      kpiId: selectedKpiType || null  // ✅ empTypeId → kpiId
+    }
+  }
+);
       const backendData = res.data;
 
       const dexieRecords = await db.evaluations
@@ -111,7 +141,9 @@ const SeePerformance = () => {
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* SELECTION PANEL */}
-        <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+        {/* <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-6 items-end"> */}
+        {/* // ── Grid bhi update karo (3 cols → 4 cols) ── */}
+<div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
           <div className="space-y-2">
             <label className="text-[11px] font-black uppercase text-green-800 ml-1 tracking-wider">Session</label>
             <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)}
@@ -128,6 +160,25 @@ const SeePerformance = () => {
               {teachers.map(t => <option key={t.UserID} value={t.UserID}>{t.Name}</option>)}
             </select>
           </div>
+{/* //// ── KPI Type Filter Dropdown ── */}
+{/* // ── SELECTION PANEL mein 4th dropdown add karo ── */}
+<div className="space-y-2">
+  <label className="text-[11px] font-black uppercase text-green-800 ml-1 tracking-wider">
+    KPI Category
+  </label>
+  <select
+    value={selectedKpiType}
+    onChange={(e) => setSelectedKpiType(e.target.value)}
+    disabled={!selectedSession}
+    className="w-full bg-slate-50 border-2 border-slate-100 p-3.5 rounded-2xl font-bold outline-none focus:border-green-600 disabled:opacity-50 transition-all cursor-pointer"
+  >
+    <option value="">All Categories</option>
+    {kpiTypes.map(t => (
+      <option key={t.id} value={t.id}>{t.name}</option>
+    ))}
+  </select>
+</div>
+
           <button onClick={fetchPerformance} disabled={loading || !selectedTeacher}
             className="bg-green-800 hover:bg-green-900 text-white h-[60px] rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-lg shadow-green-100 transition-all active:scale-95 disabled:grayscale">
             {loading ? <Loader2 className="animate-spin" /> : "Generate Analysis"}
