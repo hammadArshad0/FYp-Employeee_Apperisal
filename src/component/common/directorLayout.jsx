@@ -21,6 +21,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     {name: 'filter Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> },
     {name: 'Academic Performance', path: '/director-dashboard/academic-performance', icon: <BarChart3 size={30} /> },
     {name: 'Course Evaluation', path: '/director-dashboard/course-evaluation', icon: <BarChart3 size={30} /> },
+    {name:'Critical Analytics',path:'/director-dashboard/critical-analytics',icon:<BarChart3 size={30} />},
   ];
 
   return (

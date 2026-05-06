@@ -48,6 +48,8 @@ import MyPerformanceAcdemic from './component/feature/teacher/myPerformanceAcdem
 import CourseComparison from './component/feature/teacher/courseComparison';
 import QuestionRatings from './component/feature/teacher/Questionratings';
 import CourseEvalutionRating from './component/feature/director/CourseEvalutionRating';
+import QuestionRatingDetail from './component/feature/director/courseEvalutionQuestionRating';
+import CriticalAnalyticsScreen from './component/feature/director/criticalAnalytics';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -92,11 +94,13 @@ const App = () => {
           <Route path="performance" element={<SeePerformance />} />
           <Route path="confidential" element={<ConfidentialEvaluations />} />
           <Route path="email" element={<EmailSettings />} />
-          <Route path="filter-performance" element={<FilterPerformance/>} />
-          <Route path="filter-performance/comparison" element={<ComparisonPage/>} />
-          <Route path="academic-performance" element={<AcademicPerformance/>} />
+          <Route path="filter-performance" element={<FilterPerformance />} />
+          <Route path="filter-performance/comparison" element={<ComparisonPage />} />
+          <Route path="academic-performance" element={<AcademicPerformance />} />
           <Route path="teacher-performance/:id" element={<TeacherQuestionsRatingSee />} />
           <Route path="course-evaluation" element={<CourseEvalutionRating />} />
+          <Route path="course-evaluation/question-rating-detail/:teacherId/:sessionId/:courseCode/:evalType"element={<QuestionRatingDetail />}/>
+          <Route path="critical-analytics" element={<CriticalAnalyticsScreen />} />
         </Route>
 
         {/* --- HOD ROUTES --- */}
@@ -108,7 +112,7 @@ const App = () => {
           <Route path="courses" element={<CourseManagement />} />
           <Route path="chr" element={<CHRManagement />} />
           <Route path="societies" element={<SocietyManagement />} />
-          <Route path ="society-evaluation" element={<HODChairpersonEval />} />
+          <Route path="society-evaluation" element={<HODChairpersonEval />} />
 
         </Route>
 
@@ -123,7 +127,7 @@ const App = () => {
           <Route path="evaluate/:teacherId/:courseCode" element={<PeerEvaluationForm />} />
           <Route path="society-evaluation" element={<ChairpersonMentorEval />} />
           <Route path="acdemic-performance" element={<MyPerformanceAcdemic />} />
-          <Route path="acdemic-performance/course-comparison" element={<CourseComparison />} />  
+          <Route path="acdemic-performance/course-comparison" element={<CourseComparison />} />
           <Route path="acdemic-performance/question-ratings" element={<QuestionRatings />} />
         </Route>
 

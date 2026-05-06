@@ -26,7 +26,8 @@ const EditEvaluationQuestionnaire = () => {
         setEvaluationType(res.data.evaluationType || "");
         const formattedQuestions = (res.data.questions || []).map(q => ({
           id: q.id,
-          questionText: q.questionText
+          questionText: q.questionText,
+          isCritical: q.isCritical || false // Backend se isCritical value uthayi
         }));
         setQuestions(formattedQuestions);
       }
@@ -39,12 +40,19 @@ const EditEvaluationQuestionnaire = () => {
   };
 
   const addQuestion = () => {
-    setQuestions([...questions, { id: 0, questionText: '' }]);
+    setQuestions([...questions, { id: 0, questionText: '', isCritical: false }]);
   };
 
   const updateQuestion = (index, text) => {
     const updated = [...questions];
     updated[index].questionText = text;
+    setQuestions(updated);
+  };
+
+  // Simple Checkbox Toggle
+  const toggleCritical = (index) => {
+    const updated = [...questions];
+    updated[index].isCritical = !updated[index].isCritical;
     setQuestions(updated);
   };
 
@@ -68,7 +76,8 @@ const EditEvaluationQuestionnaire = () => {
         QuestionnaireId: parseInt(id),
         Questions: questions.map(q => ({
           Id: q.id,
-          QuestionText: q.questionText
+          QuestionText: q.questionText,
+          IsCritical: q.isCritical // Backend ko simple value bheji
         })),
         DeletedIds: deletedIds
       };
@@ -93,7 +102,6 @@ const EditEvaluationQuestionnaire = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Top Navigation */}
       <button 
         onClick={() => navigate(-1)} 
         className="flex items-center gap-2 text-green-700 font-black text-xs uppercase tracking-widest hover:text-green-800 transition-colors"
@@ -101,10 +109,7 @@ const EditEvaluationQuestionnaire = () => {
         <ArrowLeft size={18}/> BACK TO LIST
       </button>
 
-      {/* Main Container */}
       <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
-        
-        {/* Header Banner - Matching Theme */}
         <div className="bg-green-700 p-10 text-white flex justify-between items-end relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-2 text-green-200 mb-2">
@@ -122,7 +127,6 @@ const EditEvaluationQuestionnaire = () => {
         </div>
 
         <div className="p-10 space-y-10">
-          {/* Category Info Box */}
           <div className="flex items-center justify-between p-6 bg-green-50 rounded-3xl border border-green-100">
               <div className="flex items-center gap-4">
                 <div className="p-4 bg-white rounded-2xl shadow-sm text-green-700">
@@ -137,7 +141,6 @@ const EditEvaluationQuestionnaire = () => {
               </div>
           </div>
 
-          {/* Question Management */}
           <div className="space-y-6">
             <div className="flex justify-between items-center px-2">
               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Questions Management</h3>
@@ -149,22 +152,42 @@ const EditEvaluationQuestionnaire = () => {
               </button>
             </div>
 
-            {/* List of Questions */}
             <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
               {questions.map((q, idx) => (
-                <div key={idx} className="group flex items-center gap-5 bg-gray-50 p-4 pr-6 rounded-2xl border-2 border-transparent hover:border-green-200 hover:bg-white transition-all shadow-inner hover:shadow-md">
-                  <div className="w-12 h-12 flex-shrink-0 bg-white rounded-xl flex items-center justify-center font-black text-green-700 border border-gray-100 shadow-sm">
+                <div key={idx} className="group flex items-start gap-5 bg-gray-50 p-4 pr-6 rounded-2xl border-2 border-transparent hover:border-green-200 hover:bg-white transition-all shadow-inner hover:shadow-md">
+                  <div className={`w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center font-black border shadow-sm transition-colors ${q.isCritical ? 'bg-red-600 text-white border-red-700' : 'bg-white text-green-700 border-gray-100'}`}>
                     {idx + 1}
                   </div>
-                  <input 
-                    className="flex-1 bg-transparent py-2 font-bold text-gray-700 outline-none text-lg placeholder:text-gray-300"
-                    placeholder="Type question content here..."
-                    value={q.questionText}
-                    onChange={(e) => updateQuestion(idx, e.target.value)}
-                  />
+                  
+                  <div className="flex-1 space-y-3">
+                    <input 
+                      className="w-full bg-transparent font-bold text-gray-700 outline-none text-lg placeholder:text-gray-300"
+                      placeholder="Type question content here..."
+                      value={q.questionText}
+                      onChange={(e) => updateQuestion(idx, e.target.value)}
+                    />
+                    
+                    {/* SIMPLE CHECKBOX UI */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={`crit-${idx}`}
+                        checked={q.isCritical}
+                        onChange={() => toggleCritical(idx)}
+                        className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 cursor-pointer"
+                      />
+                      <label 
+                        htmlFor={`crit-${idx}`}
+                        className={`text-[10px] font-black uppercase tracking-widest cursor-pointer ${q.isCritical ? 'text-red-600' : 'text-gray-400'}`}
+                      >
+                        {q.isCritical ? 'Critical Question' : 'Mark as Critical'}
+                      </label>
+                    </div>
+                  </div>
+
                   <button 
                     onClick={() => deleteQuestion(idx)} 
-                    className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                    className="p-3 mt-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                   >
                     <Trash2 size={22}/>
                   </button>
@@ -173,7 +196,6 @@ const EditEvaluationQuestionnaire = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-6 pt-10 border-t border-gray-100">
             <button 
               onClick={() => navigate(-1)} 
