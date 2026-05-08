@@ -28,7 +28,7 @@ function AcademicPerformance() {
           DataService.get('/AcademicPerformance/GetSessions'),
           DataService.get('/AcademicPerformance/GetDepartments')
         ]);
-        
+
         const sessionsData = resS.data || [];
         setSessions(sessionsData);
         setDepartments(['All', ...(resD.data || [])]);
@@ -64,31 +64,31 @@ function AcademicPerformance() {
     setLoading(true);
     try {
       const response = await DataService.get('/AcademicPerformance/GetTeachersPerformanceList', {
-        params: { 
-          sessionId: currentFilters.session, 
-          department: currentFilters.dept === 'All' ? null : currentFilters.dept, 
-          courseCode: currentFilters.course === 'All' ? null : currentFilters.course 
+        params: {
+          sessionId: currentFilters.session,
+          department: currentFilters.dept === 'All' ? null : currentFilters.dept,
+          courseCode: currentFilters.course === 'All' ? null : currentFilters.course
         }
       });
 
       const backendData = response.data || [];
-      
+
       // Dexie (Local) Data fetch and filter by Session
       const allLocalEvals = await db.evaluations.toArray();
       const dexieMap = {};
 
       backendData.forEach(teacher => {
         const tName = teacher.Name ? teacher.Name.trim().toLowerCase() : "";
-        
+
         // Match by Teacher Name AND Selected Session ID
-        const matched = allLocalEvals.filter(e => 
+        const matched = allLocalEvals.filter(e =>
           e.teacherName && e.teacherName.trim().toLowerCase() === tName &&
           String(e.sessionId) === String(currentFilters.session)
         );
 
         if (matched.length > 0) {
           const avg4 = matched.reduce((sum, r) => sum + (Number(r.score) || 0), 0) / matched.length;
-          dexieMap[teacher.TeacherID || teacher.Name] = (avg4 / 4) * 10; 
+          dexieMap[teacher.TeacherID || teacher.Name] = (avg4 / 4) * 10;
         } else {
           dexieMap[teacher.TeacherID || teacher.Name] = 0; // Clear score if no data for this session
         }
@@ -122,15 +122,15 @@ function AcademicPerformance() {
   };
 
   // Scoring Logic (30 points total: Std 10, Peer 10, Dexie 10)
-// Scoring Logic update karo — CHR bhi include karo (40 points total)
-const calculateTotal = (t) => {
-  const sScore = Number(t.StudentAverage) || 0;
-  const pScore = Number(t.PeerAverage) || 0;
-  const dScore = dexieScores[t.TeacherID || t.Name] || 0;
-  const cScore = Number(t.ChrAverage) || 0;  // ✅ CHR add
-  const total = sScore + pScore + dScore + cScore;
-  return Math.round((total / 40) * 100); // ✅ 40 points total ab
-};
+  // Scoring Logic update karo — CHR bhi include karo (40 points total)
+  const calculateTotal = (t) => {
+    const sScore = Number(t.StudentAverage) || 0;
+    const pScore = Number(t.PeerAverage) || 0;
+    const dScore = dexieScores[t.TeacherID || t.Name] || 0;
+    const cScore = Number(t.ChrAverage) || 0;  // ✅ CHR add
+    const total = sScore + pScore + dScore + cScore;
+    return Math.round((total / 40) * 100); // ✅ 40 points total ab
+  };
 
   const getGraphData = () => {
     return teachersData.map(t => ({
@@ -148,7 +148,7 @@ const calculateTotal = (t) => {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen space-y-8 animate-in fade-in duration-700">
-      
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -170,8 +170,8 @@ const calculateTotal = (t) => {
       <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
           <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Active Session</label>
-          <select 
-            value={filters.session} 
+          <select
+            value={filters.session}
             onChange={(e) => handleSessionChange(e.target.value)}
             className="w-full bg-gray-50 border-none p-4 rounded-2xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
           >
@@ -180,9 +180,9 @@ const calculateTotal = (t) => {
         </div>
         <div className="space-y-2">
           <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Department</label>
-          <select 
-            value={filters.dept} 
-            onChange={(e) => setFilters({...filters, dept: e.target.value})}
+          <select
+            value={filters.dept}
+            onChange={(e) => setFilters({ ...filters, dept: e.target.value })}
             className="w-full bg-gray-50 border-none p-4 rounded-2xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
           >
             {departments.map((d, i) => <option key={i} value={d}>{d}</option>)}
@@ -190,9 +190,9 @@ const calculateTotal = (t) => {
         </div>
         <div className="space-y-2">
           <label className="text-xs font-black text-gray-400 uppercase ml-2 tracking-widest">Course</label>
-          <select 
-            value={filters.course} 
-            onChange={(e) => setFilters({...filters, course: e.target.value})}
+          <select
+            value={filters.course}
+            onChange={(e) => setFilters({ ...filters, course: e.target.value })}
             className="w-full bg-gray-50 border-none p-4 rounded-2xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
           >
             <option value="All">All Courses</option>
@@ -224,10 +224,10 @@ const calculateTotal = (t) => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={getGraphData()} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" tick={{fontSize: 10, fontWeight: '900'}} axisLine={false} tickLine={false} />
-                    <YAxis domain={[0, 100]} tick={{fontSize: 10, fontWeight: '900'}} axisLine={false} tickLine={false} />
-                    <Tooltip 
-                      cursor={{fill: '#f8fafc'}}
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: '900' }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 10, fontWeight: '900' }} axisLine={false} tickLine={false} />
+                    <Tooltip
+                      cursor={{ fill: '#f8fafc' }}
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           const v = payload[0].value;
@@ -268,8 +268,8 @@ const calculateTotal = (t) => {
 
                 return (
                   <div key={idx} className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-5" style={{backgroundColor: getBarColor(totalPerc)}}></div>
-                    
+                    <div className="absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-5" style={{ backgroundColor: getBarColor(totalPerc) }}></div>
+
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex items-center gap-4">
                         <div className="bg-gray-100 p-4 rounded-3xl text-gray-500 group-hover:bg-blue-600 group-hover:text-white transition-all">
@@ -278,7 +278,8 @@ const calculateTotal = (t) => {
                         <div>
                           <h3 className="text-xl font-black text-gray-800">{t.Name}</h3>
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                            <GraduationCap size={12} /> {t.CourseCode || 'N/A'}
+                            <GraduationCap size={12} />
+                            {filters.course === 'All' ? (t.CourseCode || 'N/A') : filters.course}
                           </p>
                         </div>
                       </div>
@@ -291,14 +292,26 @@ const calculateTotal = (t) => {
                     <div className="space-y-5 mb-8">
                       <MetricBar label="Student Evaluation" value={(Number(t.StudentAverage) / 10) * 100} />
                       <MetricBar label="Peer Evaluation" value={(Number(t.PeerAverage) / 10) * 100} />
-                      <MetricBar label="Confidential Evaluation" value={(dexieVal / 10) * 100}  />
-                      <MetricBar label="CHR Report" value={(Number(t.ChrAverage) / 10) * 100}  />
+                      <MetricBar label="Confidential Evaluation" value={(dexieVal / 10) * 100} />
+                      <MetricBar label="CHR Report" value={(Number(t.ChrAverage) / 10) * 100} />
                       {/* isDexie={hasDexie} */}
                     </div>
 
-                    <button 
-                      onClick={() => navigate(`/director-dashboard/teacher-performance/${t.TeacherID || t.Name}`)}
-                      className="w-full bg-green-500 group-hover:bg-green-900 group-hover:text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all"
+                    <button
+                      onClick={() => {
+                        // Agar filter mein 'All' hai to teacher ka default courseCode uthayein, 
+                        // warna filter wala courseCode bhejein.
+                        const targetCourse = filters.course === 'All' ? (t.CourseCode || '') : filters.course;
+
+                        navigate(`/director-dashboard/teacher-performance/${t.TeacherID}`, {
+                          state: {
+                            courseCode: targetCourse,
+                            teacherName: t.Name,
+                            sessionId: filters.session
+                          }
+                        });
+                      }}
+                      className="w-full bg-green-500 group-hover:bg-green-900 group-hover:text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all shadow-sm"
                     >
                       See Question performance <ChevronRight size={16} />
                     </button>
@@ -326,12 +339,12 @@ function MetricBar({ label, value, isDexie = false }) {
       <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-tighter text-gray-400 px-1">
         <div className="flex items-center gap-1.5">
           <span>{label}</span>
-          {isDexie && <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-[7px] flex items-center gap-0.5"><ShieldCheck size={8}/> Session Sync</span>}
+          {isDexie && <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-[7px] flex items-center gap-0.5"><ShieldCheck size={8} /> Session Sync</span>}
         </div>
         <span className="text-gray-700">{safeVal}%</span>
       </div>
       <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-        <div 
+        <div
           className={`h-full rounded-full transition-all duration-1000 ${getColor(safeVal)}`}
           style={{ width: `${safeVal}%` }}
         />

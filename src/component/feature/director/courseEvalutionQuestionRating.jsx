@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
-} from 'recharts';
-import { ArrowLeft, X, User, Users, BookOpen, ChevronDown } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { ArrowLeft, X, User, Users, BookOpen, ChevronDown, AlertTriangle, Star } from 'lucide-react';
 import DataService from '../../../services/axios';
 
-// ─── Custom Tooltip for question graph ───────────────────────────────────────
+// ✅ CustomTooltip Definition (Kept outside to avoid ReferenceError)
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
@@ -20,82 +18,62 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-// ─── Score badge colors ───────────────────────────────────────────────────────
-const scoreBadge = (score) => {
-  const map = {
-    4: 'bg-green-100 text-green-800',
-    3: 'bg-blue-100 text-blue-800',
-    2: 'bg-yellow-100 text-yellow-800',
-    1: 'bg-red-100 text-red-800',
-  };
-  return map[score] || 'bg-gray-100 text-gray-600';
-};
-
 const QuestionRatingDetail = () => {
-  const { teacherId, sessionId, courseCode: paramCourse, evalType: paramEvalType } = useParams();
+  const { teacherId, sessionId, courseCode: paramCourse } = useParams();
   const navigate = useNavigate();
 
-  // ── State ──────────────────────────────────────────────────────────────────
-  const [courses, setCourses]         = useState([]);
+  const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(paramCourse || '');
-  const [evalType, setEvalType]       = useState(paramEvalType || 'both');
-  const [questions, setQuestions]     = useState([]);
-  const [loading, setLoading]         = useState(false);
+  const [evalType, setEvalType] = useState('both');
+  const [isCritical, setIsCritical] = useState('all');
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState(null);
 
-  // Modal state
-  const [modalOpen, setModalOpen]     = useState(false);
-  const [modalData, setModalData]     = useState(null); // { question, evaluators[] }
-
-  // ── 1. Load courses for this teacher + session ─────────────────────────────
+  // Load Courses
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const res = await DataService.get(`/TeacherSelf/GetMyCourses/${teacherId}/${sessionId}`);
-        // res.data = ["CS101","CS202",...]
         setCourses(res.data);
         if (!paramCourse && res.data.length > 0) setSelectedCourse(res.data[0]);
-      } catch (err) {
-        console.error('Courses fetch error:', err);
-      }
+      } catch (err) { console.error('Courses error:', err); }
     };
     fetchCourses();
-  }, [teacherId, sessionId]);
+  }, [teacherId, sessionId, paramCourse]);
 
-  // ── 2. Load question data whenever course or evalType changes ──────────────
-  useEffect(() => {
+  // Fetch Questions
+  const fetchQuestions = useCallback(async () => {
     if (!selectedCourse) return;
-    fetchQuestions();
-  }, [selectedCourse, evalType]);
-
-  const fetchQuestions = async () => {
     setLoading(true);
     try {
       const res = await DataService.get(
-        `/TeacherSelf/GetCourseQuestionDetail/${teacherId}/${sessionId}/${selectedCourse}?evaluationType=${evalType}`
+        `/TeacherSelf/GetMyQuestionStats/${teacherId}/${sessionId}`, {
+          params: {
+            courseCode: selectedCourse,
+            evaluationType: evalType,
+            onlyCritical: isCritical === 'critical'
+          }
+        }
       );
       setQuestions(res.data);
     } catch (err) {
-      console.error('Questions fetch error:', err);
+      console.error('Fetch error:', err);
       setQuestions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    } finally { setLoading(false); }
+  }, [teacherId, sessionId, selectedCourse, evalType, isCritical]);
 
-  // ── 3. Click on bar → open modal with evaluator list ──────────────────────
+  useEffect(() => { fetchQuestions(); }, [fetchQuestions]);
+
   const handleBarClick = (data) => {
     setModalData(data);
     setModalOpen(true);
   };
 
-  // Short label for X-axis
-  const shortLabel = (text, i) =>
-    text ? (text.length > 18 ? `Q${i + 1}` : text) : `Q${i + 1}`;
-
-  // ── Prepare chart data ─────────────────────────────────────────────────────
   const chartData = questions.map((q, i) => ({
     ...q,
-    label: shortLabel(q.QuestionText, i),
+    label: q.QuestionText?.length > 15 ? `Q${i + 1}` : q.QuestionText,
     AvgRounded: parseFloat((q.AverageScore || 0).toFixed(2)),
   }));
 
@@ -107,364 +85,174 @@ const QuestionRatingDetail = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen font-sans">
+    <div className="p-8 bg-gray-50 min-h-screen font-sans">
+      
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="p-3 bg-white rounded-2xl shadow-sm hover:bg-slate-900 hover:text-white transition-all">
+            <ArrowLeft size={18} />
+          </button>
+          <div>
+            <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tighter italic">Analytical Review</h1>
+            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Course: {selectedCourse}</p>
+          </div>
+        </div>
+      </div>
 
-      {/* ── HEADER ── */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2.5 bg-white rounded-2xl border border-gray-200 hover:bg-gray-50
-                     text-gray-500 hover:text-gray-800 transition-all active:scale-95"
-        >
-          <ArrowLeft size={18} />
-        </button>
+      {/* FILTER BAR */}
+      <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div>
-          <h1 className="text-2xl font-black text-gray-800">Question-wise Ratings</h1>
-          <p className="text-sm text-gray-400 mt-0.5">
-            Teacher ID: <span className="font-bold text-gray-600">{teacherId}</span>
-            {' · '}Session: <span className="font-bold text-gray-600">{sessionId}</span>
-          </p>
+          <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Academic Course</label>
+          <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}
+            className="w-full bg-gray-50 p-3 rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-blue-500 appearance-none shadow-inner">
+            {courses.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Source Type</label>
+          <select value={evalType} onChange={(e) => setEvalType(e.target.value)}
+            className="w-full bg-gray-50 p-3 rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-blue-500 appearance-none shadow-inner">
+            <option value="both">Both (Student & Peer)</option>
+            <option value="student">Student Feedback</option>
+            <option value="peer">Peer Review</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-[9px] font-black text-gray-400 uppercase ml-2">Issue Tracking</label>
+          <select value={isCritical} onChange={(e) => setIsCritical(e.target.value)}
+            className={`w-full p-3 rounded-xl font-bold text-xs outline-none appearance-none shadow-inner ${isCritical === 'critical' ? 'bg-red-50 text-red-600' : 'bg-gray-50'}`}>
+            <option value="all">All Questions</option>
+            <option value="critical">Critical Issues Only</option>
+          </select>
         </div>
       </div>
 
-      {/* ── FILTER BAR ── */}
-      <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-end mb-8">
-
-        {/* Course Dropdown */}
-        <div className="flex-1 min-w-[180px]">
-          <label className="text-[11px] font-black text-gray-400 mb-1.5 block uppercase tracking-widest">
-            Course
-          </label>
-          <div className="relative">
-            <select
-              value={selectedCourse}
-              onChange={(e) => setSelectedCourse(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-50 rounded-2xl text-sm font-semibold text-gray-700
-                         border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500
-                         appearance-none pr-10"
-            >
-              {courses.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-            <ChevronDown
-              size={16}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-            />
-          </div>
-        </div>
-
-        {/* Evaluation Type */}
-        <div className="flex-1 min-w-[160px]">
-          <label className="text-[11px] font-black text-gray-400 mb-1.5 block uppercase tracking-widest">
-            Evaluation Type
-          </label>
-          <div className="relative">
-            <select
-              value={evalType}
-              onChange={(e) => setEvalType(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-50 rounded-2xl text-sm font-semibold text-gray-700
-                         border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500
-                         appearance-none pr-10"
-            >
-              <option value="both">Both (Student &amp; Peer)</option>
-              <option value="student">Student Only</option>
-              <option value="peer">Peer Only</option>
-            </select>
-            <ChevronDown
-              size={16}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-            />
-          </div>
-        </div>
-
-        {/* Info badge */}
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-green-50 rounded-2xl border border-green-200">
-          <BookOpen size={16} className="text-green-700" />
-          <span className="text-sm font-black text-green-800">{selectedCourse}</span>
-        </div>
-      </div>
-
-      {/* ── CONTENT ── */}
       {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="w-10 h-10 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[3rem] shadow-sm">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synchronizing...</span>
         </div>
-
-      ) : questions.length > 0 ? (
+      ) : (
         <div className="space-y-8">
-
-          {/* GRAPH — click a bar to open modal */}
-          <div className="bg-white p-8 rounded-[36px] border border-gray-100 shadow-sm">
-            <div className="mb-6">
-              <h2 className="text-lg font-black text-gray-800">Question-wise Average Score</h2>
-              <p className="text-xs text-gray-400 mt-1">
-                Click any bar to see individual evaluator scores
-              </p>
-            </div>
-
-            <div className="h-[380px] w-full">
+          
+          {/* CHART */}
+          <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm">
+            <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 10, right: 20, left: 0, bottom: 60 }}
-                  onClick={(e) => {
-                    if (e && e.activePayload && e.activePayload.length) {
-                      handleBarClick(e.activePayload[0].payload);
-                    }
-                  }}
-                  style={{ cursor: 'pointer' }}
-                >
+                <BarChart data={chartData} onClick={(e) => e?.activePayload && handleBarClick(e.activePayload[0].payload)}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis
-                    dataKey="label"
-                    axisLine={false} tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 11, fontWeight: 700 }}
-                    dy={10} angle={-25} textAnchor="end"
-                    interval={0}
-                  />
-                  <YAxis
-                    domain={[0, 4]}
-                    axisLine={false} tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12 }}
-                    ticks={[0, 1, 2, 3, 4]}
-                  />
+                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }} angle={-20} textAnchor="end" interval={0} />
+                  <YAxis domain={[0, 4]} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} ticks={[0, 1, 2, 3, 4]} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="AvgRounded" name="Avg Score" radius={[6,6,0,0]} barSize={40}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={index} fill={getBarColor(entry.AvgRounded)} />
-                    ))}
+                  <Bar dataKey="AvgRounded" radius={[10, 10, 0, 0]} barSize={45} cursor="pointer">
+                    {chartData.map((entry, index) => <Cell key={index} fill={getBarColor(entry.AvgRounded)} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          </div>
 
-            {/* Color legend */}
-            <div className="flex flex-wrap gap-4 mt-2 justify-end">
-              {[
-                { color: '#15803d', label: 'Excellent (≥3.5)' },
-                { color: '#86efac', label: 'Good (≥2.5)' },
-                { color: '#fbbf24', label: 'Average (≥1.5)' },
-                { color: '#f87171', label: 'Poor (<1.5)' },
-              ].map(({ color, label }) => (
-                <div key={label} className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-sm" style={{ background: color }} />
-                  <span className="text-xs font-semibold text-gray-400">{label}</span>
+          {/* QUESTION CARDS */}
+          <div className="grid grid-cols-1 gap-6">
+            {questions.map((q, i) => (
+              <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[9px] font-black bg-slate-900 text-white px-3 py-1 rounded-full uppercase tracking-widest">Q{i+1}</span>
+                      <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${q.Type === 'Student' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}`}>
+                        {q.Type}
+                      </span>
+                      {q.isCritical && (
+                        <span className="flex items-center gap-1 text-[9px] font-black bg-red-600 text-white px-3 py-1 rounded-full uppercase">
+                          <AlertTriangle size={10}/> Critical
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800 leading-tight">{q.QuestionText}</h3>
+                    
+                    {/* ✅ Rating Boxes with Stars inside */}
+                    <div className="flex gap-4 pt-4">
+                      {[1, 2, 3, 4].map(n => (
+                        <div key={n} className="bg-white border border-gray-100 p-4 rounded-[2rem] text-center min-w-[90px] shadow-sm flex flex-col items-center">
+                          {/* Stars Layout */}
+                          <div className="flex gap-0.5 mb-1.5">
+                            {[...Array(n)].map((_, starIdx) => (
+                              <Star key={starIdx} size={10} className={`fill-current ${n === 4 ? 'text-green-500' : n === 3 ? 'text-blue-400' : n === 2 ? 'text-yellow-400' : 'text-red-400'}`} />
+                            ))}
+                          </div>
+                          <p className="text-[10px] font-black text-slate-800 mb-0.5">{q[`Score${n}`] || 0}</p>
+                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">Responses</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button onClick={() => handleBarClick(q)} className="flex items-center gap-2 bg-blue-50 text-blue-700 px-6 py-3 rounded-2xl text-[10px] font-black uppercase hover:bg-blue-600 hover:text-white transition-all mt-6 shadow-sm">
+                      <Users size={14}/> Participant Breakdown
+                    </button>
+                  </div>
+
+                  <div className="text-right flex flex-col items-end">
+                    <div className="bg-slate-50 px-5 py-3 rounded-3xl mb-2 flex flex-col items-center border border-slate-100 shadow-inner">
+                       <span className="text-4xl font-black italic tracking-tighter text-slate-900">{(q.AverageScore || 0).toFixed(2)}</span>
+                       <div className="flex gap-1 mt-1">
+                          {[1,2,3,4].map((star) => (
+                            <Star key={star} size={12} className={`${star <= Math.round(q.AverageScore) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'}`} />
+                          ))}
+                       </div>
+                    </div>
+                    <div className="text-[9px] font-black text-gray-300 uppercase tracking-widest pr-2">Avg Rating</div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* QUESTION CARDS LIST */}
-        {/* ── QUESTION ANALYSIS CARDS (AS PER IMAGE) ── */}
-<div className="space-y-6">
-  {questions.map((q, i) => (
-    <div
-      key={`${q.Type}-${q.QuestionId}-${i}`}
-      className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm"
-    >
-      {/* Header: Question Number, Text, and Avg Rating */}
-      <div className="flex justify-between items-start gap-4 mb-6">
-        <div className="flex gap-4">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center shrink-0">
-            <span className="text-gray-400 font-black">{i + 1}</span>
-          </div>
-          <div>
-            <h3 className="text-[#2D3748] font-black text-lg leading-tight mb-2">
-              {q.QuestionText || "Question Title"}
-            </h3>
-            {/* Stars Placeholder - (Static for UI look) */}
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4].map((star) => (
-                <span key={star} className={star <= Math.round(q.AverageScore) ? "text-yellow-400" : "text-gray-200"}>
-                  ★
-                </span>
-              ))}
-              <span className="text-gray-400 text-xs font-bold ml-1">({parseFloat(q.AverageScore || 0).toFixed(1)})</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-right">
-          <p className="text-3xl font-black text-green-600 leading-none">
-            {parseFloat(q.AverageScore || 0).toFixed(2)}
-          </p>
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Avg Rating</p>
-        </div>
-      </div>
-
-      {/* Score Distribution Section */}
-      <div className="mb-6">
-        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4">Score Distribution</p>
-        <div className="space-y-3">
-          {[4, 3, 2, 1].map((s) => {
-            const count = q[`Score${s}`] || 0;
-            // Percentage calculation for the bar width
-            const pct = q.TotalResponses > 0 ? (count / q.TotalResponses) * 100 : 0;
-            
-            // Color logic based on score
-            const barColor = s === 4 ? "bg-green-500" : s === 3 ? "bg-blue-400" : s === 2 ? "bg-orange-400" : "bg-red-500";
-
-            return (
-              <div key={s} className="flex items-center gap-4">
-                <span className="text-[11px] font-bold text-gray-500 w-4">S{s}</span>
-                <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-1000 ${barColor}`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <span className="text-xs font-bold text-gray-700 w-4 text-right">{count}</span>
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Footer: Eval Type and Action Link */}
-      <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-        <span className="bg-blue-50 text-blue-600 text-[10px] font-black px-4 py-1.5 rounded-full border border-blue-100 uppercase tracking-wide">
-          {q.Type === 'Student' ? 'Student Eval' : 'Peer Eval'}
-        </span>
-        
-        <button 
-          onClick={() => handleBarClick({ ...q, label: `Q${i + 1}` })}
-          className="text-[11px] font-bold text-gray-400 italic hover:text-green-600 transition-colors"
-        >
-          Click to see who rated →
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
-        </div>
-
-      ) : (
-        <div className="bg-white rounded-[40px] border-2 border-dashed border-gray-200 p-20 text-center">
-          <div className="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <BookOpen size={32} className="text-gray-200" />
+            ))}
           </div>
-          <h3 className="text-lg font-black text-gray-700">No Questions Found</h3>
-          <p className="text-gray-400 text-sm max-w-xs mx-auto mt-2">
-            No evaluation data for <strong>{selectedCourse}</strong> with type "{evalType}".
-          </p>
         </div>
       )}
 
-      {/* ── EVALUATOR MODAL ── */}
+      {/* DETAIL MODAL (REMAINS SAME) */}
       {modalOpen && modalData && (
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4"
-          onClick={() => setModalOpen(false)}
-        >
-          <div
-            className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl max-h-[80vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="p-6 border-b border-gray-100 flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full
-                    ${modalData.Type === 'Student'
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                      : 'bg-purple-50 text-purple-700 border border-purple-200'
-                    }`}
-                  >
-                    {modalData.Type === 'Student' ? '👤 Student Evaluation' : '👥 Peer Evaluation'}
-                  </span>
-                </div>
-                <h3 className="text-base font-black text-gray-800 leading-snug">
-                  {modalData.QuestionText || 'Question Detail'}
-                </h3>
-                <p className="text-xs text-gray-400 mt-1 font-semibold">
-                  Avg: <span className="text-green-700 font-black">
-                    {parseFloat(modalData.AverageScore || 0).toFixed(2)} / 4
-                  </span>
-                  {' · '}{modalData.TotalResponses} responses
-                </p>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-xl rounded-[3rem] overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+            <div className="p-10 border-b border-gray-50 flex justify-between items-start bg-gray-50/50">
+              <div>
+                <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1">Evaluator Metrics</p>
+                <h4 className="text-lg font-bold text-slate-800 leading-tight">{modalData.QuestionText}</h4>
               </div>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
-              >
-                <X size={18} />
+              <button onClick={() => setModalOpen(false)} className="p-3 bg-white rounded-full shadow-sm hover:text-red-500 transition-colors">
+                <X size={20}/>
               </button>
             </div>
 
-            {/* Evaluator List */}
-            <div className="overflow-y-auto flex-1 p-4 space-y-2">
-              {(modalData.StudentDetails || []).length === 0 ? (
-                <p className="text-center text-gray-400 text-sm py-8">No individual records available.</p>
-              ) : (
-                (modalData.StudentDetails || []).map((person, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-4 rounded-2xl bg-gray-50
-                               hover:bg-green-50 border border-transparent hover:border-green-200 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      {/* Avatar */}
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black
-                        ${modalData.Type === 'Student'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-purple-100 text-purple-700'
-                        }`}
-                      >
-                        {modalData.Type === 'Student'
-                          ? <User size={16} />
-                          : <Users size={16} />
-                        }
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-black text-gray-800">
-                          {person.StudentName || person.Name || '—'}
-                        </p>
-                        <p className="text-xs text-gray-400 font-semibold">
-                          {modalData.Type === 'Student' ? 'Roll No' : 'Teacher ID'}: {person.RollNo || '—'}
-                        </p>
-                      </div>
+            <div className="p-8 overflow-y-auto space-y-3">
+              {(modalData.Evaluators || []).map((ev, i) => (
+                <div key={i} className="flex items-center justify-between bg-gray-50/50 border border-gray-100 p-5 rounded-2xl">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-xl ${modalData.Type === 'Student' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+                      {modalData.Type === 'Student' ? <User size={18}/> : <Users size={18}/>}
                     </div>
-
-                    {/* Score badge */}
-                    <span className={`px-3 py-1 rounded-xl text-sm font-black ${scoreBadge(person.Score)}`}>
-                      {person.Score} / 4
-                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-slate-800">{ev.Name || 'Anonymous'}</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase">ID: {ev.ID}</p>
+                    </div>
                   </div>
-                ))
-              )}
+                  <div className={`text-sm font-black px-5 py-2 rounded-xl border-2 ${
+                    ev.GivenScore >= 3 ? 'border-green-100 bg-green-50 text-green-700' : 
+                    ev.GivenScore === 2 ? 'border-orange-100 bg-orange-50 text-orange-600' : 'border-red-100 bg-red-50 text-red-600'
+                  }`}>
+                    {ev.GivenScore} / 4
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* Score Distribution in Modal */}
-            <div className="p-5 border-t border-gray-100">
-              <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3">
-                Score Distribution
-              </p>
-              <div className="grid grid-cols-4 gap-2">
-                {[1, 2, 3, 4].map(s => {
-                  const count = modalData[`Score${s}`] || 0;
-                  const pct   = modalData.TotalResponses > 0
-                    ? ((count / modalData.TotalResponses) * 100).toFixed(0)
-                    : 0;
-                  return (
-                    <div key={s} className="text-center bg-gray-50 rounded-2xl p-3">
-                      <p className="text-xl font-black text-gray-800">{count}</p>
-                      <p className="text-[11px] text-gray-400 font-bold">Score {s}</p>
-                      <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${pct}%`,
-                            background: s === 4 ? '#15803d' : s === 3 ? '#86efac'
-                                      : s === 2 ? '#fbbf24' : '#f87171'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="p-8 border-t border-gray-50 flex justify-center">
+               <button onClick={() => setModalOpen(false)} className="bg-slate-900 text-white px-10 py-3 rounded-2xl text-[11px] font-black uppercase hover:bg-slate-800 transition-all">
+                 Close Analytics
+               </button>
             </div>
           </div>
         </div>
