@@ -72,13 +72,33 @@ const MakeQuestionaire = () => {
            {q.Flag === "1" ? '● Active' : '○ Archived'}
          </div>
          <div className="flex gap-2">
-            <button 
+            {/* <button 
               onClick={() => navigate(`/director-dashboard/edit/${q.Id}`)} 
               className="p-2.5 bg-gray-50 text-gray-400 hover:text-blue-600 rounded-xl transition-all border border-transparent hover:border-blue-100"
               title="Edit Questionnaire"
             >
               <Edit3 size={18}/>
-            </button>
+            </button> */}
+            <button 
+  onClick={() => {
+    if (q.Flag !== "1") {
+      navigate(`/director-dashboard/edit/${q.Id}`);
+    }
+  }}
+  disabled={q.Flag === "1"}
+  className={`p-2.5 rounded-xl transition-all border ${
+    q.Flag === "1"
+      ? 'bg-gray-100 text-gray-300 cursor-not-allowed border-gray-100'
+      : 'bg-gray-50 text-gray-400 hover:text-blue-600 border-transparent hover:border-blue-100'
+  }`}
+  title={
+    q.Flag === "1"
+      ? "Active questionnaire cannot be edited"
+      : "Edit Questionnaire"
+  }
+>
+  <Edit3 size={18}/>
+</button>
             <button 
               onClick={() => handleDelete(q.Id)} 
               className="p-2.5 bg-gray-100 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm"

@@ -156,12 +156,12 @@ const ClassHeldReport = () => {
             </select>
           </div>
 
-          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Calendar size={13} color="#2563eb" />
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#1d4ed8' }}>
+          {/* <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 6 }}> */}
+            {/* <Calendar size={13} color="#2563eb" /> */}
+            {/* <span style={{ fontSize: 12, fontWeight: 700, color: '#1d4ed8' }}>
               {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-            </span>
-          </div>
+            </span> */}
+          {/* </div> */}
         </div>
       </div>
 

@@ -299,12 +299,12 @@ const CHRManagement = () => {
           </select>
 
           {/* Date badge */}
-          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Calendar size={14} color="#16a34a" />
             <span style={{ fontSize: 12, fontWeight: 700, color: '#15803d' }}>
               {new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
-          </div>
+          </div> */}
 
           {details && (
             <button onClick={handleBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e2e8f0', padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, color: '#475569', cursor: 'pointer' }}>
@@ -401,7 +401,7 @@ const CHRManagement = () => {
             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem 2rem', background: '#fff', borderRadius: 16, border: '2px dashed #e2e8f0' }}>
               <ClipboardCheck size={36} color="#cbd5e1" style={{ marginBottom: 12 }} />
               <p style={{ color: '#94a3b8', fontWeight: 700, margin: 0 }}>
-                {selectedSession ? 'Is session mein koi CHR report nahi mili.' : 'No CHR Reports found.'}
+                {selectedSession ? 'No CHR .' : 'No CHR Reports found.'}
               </p>
             </div>
           )}
@@ -450,7 +450,7 @@ const CHRManagement = () => {
                     <Th ch="Score" center />
                     <Th ch="Status" />
                     <Th ch="Remarks" />
-                    {/* <Th ch="Actions" center /> */}
+                    <Th ch="Actions" center />
                   </tr>
                 </thead>
                 <tbody>
@@ -498,14 +498,14 @@ const CHRManagement = () => {
                             >
                               <Pencil size={12} /> Edit
                             </button> */}
-                            <button
+                            {/* <button
                               onClick={() => askDeleteRow(d)}
                               style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#e11d48', transition: 'all .15s' }}
                               onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; }}
                               onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
                             >
                               <Trash2 size={12} /> Del
-                            </button>
+                            </button> */}
                           </div>
                         </td>
                       </tr>

@@ -13,15 +13,23 @@ const StudentDashboard = () => {
 
   // 2. Confidential IDs List
   const confidentialStudentIds = [
-    "25-ARID-0101",
-    "25-ARID-0102",
-    "26-ARID-001",
-    "26-ARID-002",
-    "26-ARID-006",
-     "26-ARID-005",
-     "26-Arid-4001",
-     "26-Arid-4002",
-     "26-Arid-4003"
+    "S01",
+    "S02",
+    "S03",
+    "S04",
+    "S05",
+    "S06",
+    "S07",
+    "S08",
+    "S09",
+    "S10",
+    "S11",
+    "S12",
+    "S13",
+    "S14",
+    "S15",
+    
+  
   ];
 
   // 3. Logic: Compare with case-insensitivity and trim spaces
