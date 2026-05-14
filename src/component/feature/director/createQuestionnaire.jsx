@@ -16,7 +16,8 @@ const CreateEvaluationQuestionaire = () => {
     { label: "Student Evaluation", value: "S" },
     { label: "Confidential Evaluation", value: "C" },
     { label: "Society Evaluation(chairperson)", value: "SEC" },
-    { label: "Society Evaluation(Mentor)", value: "SEM" }
+    { label: "Society Evaluation(Mentor)", value: "SEM" },
+    { label: "Project Evaluation", value: "PE" }
   ];
 
   const addQuestion = () => setQuestions([...questions, { QuestionText: "", IsCritical: false }]);

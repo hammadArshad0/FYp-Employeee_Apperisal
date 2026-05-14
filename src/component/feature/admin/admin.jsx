@@ -8,6 +8,7 @@ import {
   Loader2,
   ArrowLeft,
   CheckCircle,
+  Info
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DataService from "../../../services/axios";
@@ -28,7 +29,11 @@ const AdminUploadPanel = () => {
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [sessions, setSessions] = useState([]);
-  const [selectedSession, setSelectedSession] = useState("");
+  
+  // Separate states for sessions to prevent data mix-up
+  const [studentSession, setStudentSession] = useState("");
+  const [chrSession, setChrSession] = useState("");
+  const [enrollmentSession, setEnrollmentSession] = useState("");
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -58,26 +63,27 @@ const AdminUploadPanel = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (!selectedSession) {
-      alert("Please select a session before uploading!");
+    if (!studentSession) {
+      alert("Please select a session for Student upload!");
       return;
     }
 
     setLoadingStudent(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("sessionId", selectedSession);
+    formData.append("sessionId", studentSession);
 
     try {
       const response = await DataService.post("student/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert(response.data || "Students uploaded successfully!");
-      addUploadedFile(file.name, "Student", "success", response.data || "Uploaded successfully");
+      const msg = response.data.Message || response.data || "Students uploaded!";
+      alert(msg);
+      addUploadedFile(file.name, "Student", "success", msg);
     } catch (err) {
-      console.error("Student Upload Error:", err);
-      alert(err.response?.data || "Error uploading students");
-      addUploadedFile(file.name, "Student", "error", err.response?.data || "Upload failed");
+      const errorMsg = err.response?.data || "Error uploading students";
+      alert(errorMsg);
+      addUploadedFile(file.name, "Student", "error", errorMsg);
     } finally {
       setLoadingStudent(false);
       event.target.value = "";
@@ -97,9 +103,9 @@ const AdminUploadPanel = () => {
       alert(response.data || "Teachers uploaded successfully!");
       addUploadedFile(file.name, "Teacher", "success", response.data || "Uploaded successfully");
     } catch (err) {
-      console.error("Teacher Upload Error:", err);
-      alert(err.response?.data?.message || err.response?.data || "Error uploading teachers");
-      addUploadedFile(file.name, "Teacher", "error", err.response?.data || "Upload failed");
+      const errorMsg = err.response?.data?.message || err.response?.data || "Error uploading teachers";
+      alert(errorMsg);
+      addUploadedFile(file.name, "Teacher", "error", errorMsg);
     } finally {
       setLoadingTeacher(false);
       event.target.value = "";
@@ -118,34 +124,25 @@ const AdminUploadPanel = () => {
       const response = await DataService.post("course/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert(response.data.Message || response.data || "Courses uploaded successfully!");
-      addUploadedFile(file.name, "Course", "success", response.data.Message || "Uploaded successfully");
+      const msg = response.data.Message || response.data || "Courses uploaded!";
+      alert(msg);
+      addUploadedFile(file.name, "Course", "success", msg);
     } catch (err) {
-      console.error("Course Upload Error:", err);
-      alert(err.response?.data || "Error uploading courses");
-      addUploadedFile(file.name, "Course", "error", err.response?.data || "Upload failed");
+      const errorMsg = err.response?.data || "Error uploading courses";
+      alert(errorMsg);
+      addUploadedFile(file.name, "Course", "error", errorMsg);
     } finally {
       setLoadingCourse(false);
       event.target.value = "";
     }
   };
 
-  // ── CHR Upload — Session validation + sessionID append ──────
   const handleChrUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // 1. Session check
-    if (!selectedSession) {
-      alert("Please select a session before uploading CHR Report!");
-      event.target.value = "";
-      return;
-    }
-
-    // 2. Excel file validation
-    const fileExtension = file.name.split(".").pop().toLowerCase();
-    if (fileExtension !== "xlsx" && fileExtension !== "xls") {
-      alert("Sirf Excel files (.xlsx, .xls) allowed hain!");
+    if (!chrSession) {
+      alert("Please select a session for CHR Report!");
       event.target.value = "";
       return;
     }
@@ -153,27 +150,17 @@ const AdminUploadPanel = () => {
     setLoadingChr(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("sessionID", selectedSession); // ← Session backend ko bhejo
+    formData.append("sessionID", chrSession);
 
     try {
       const response = await DataService.post("CHR/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
       const successMsg = response.data.Message || "CHR Report uploaded successfully!";
-      const uploadedCount = response.data.Count ? ` (${response.data.Count} records)` : "";
-      const sessionName = response.data.SessionName ? ` | Session: ${response.data.SessionName}` : "";
-
-      alert(successMsg + uploadedCount + sessionName);
+      alert(successMsg);
       addUploadedFile(file.name, "CHR Report", "success", successMsg);
     } catch (err) {
-      console.error("CHR Upload Error:", err);
-
-      const errorMsg =
-        typeof err.response?.data === "string"
-          ? err.response.data
-          : err.response?.data?.ExceptionMessage || "Error uploading CHR report";
-
+      const errorMsg = typeof err.response?.data === "string" ? err.response.data : "Error uploading CHR report";
       alert(errorMsg);
       addUploadedFile(file.name, "CHR Report", "error", errorMsg);
     } finally {
@@ -186,26 +173,27 @@ const AdminUploadPanel = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (!selectedSession) {
-      alert("Please select a session first!");
+    if (!enrollmentSession) {
+      alert("Please select a session for Enrollment!");
       return;
     }
 
     setLoadingEnrollment(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("sessionId", selectedSession);
+    formData.append("sessionId", enrollmentSession);
 
     try {
       const response = await DataService.post("Enrollment/UploadExcel", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert(response.data || "Enrollment uploaded successfully!");
-      addUploadedFile(file.name, "Enrollment", "success", response.data || "Uploaded successfully");
+      const msg = response.data || "Enrollment uploaded successfully!";
+      alert(msg);
+      addUploadedFile(file.name, "Enrollment", "success", msg);
     } catch (err) {
-      console.error("Enrollment Upload Error:", err);
-      alert(err.response?.data || "Error uploading Enrollment");
-      addUploadedFile(file.name, "Enrollment", "error", err.response?.data || "Upload failed");
+      const errorMsg = err.response?.data || "Error uploading Enrollment";
+      alert(errorMsg);
+      addUploadedFile(file.name, "Enrollment", "error", errorMsg);
     } finally {
       setLoadingEnrollment(false);
       event.target.value = "";
@@ -227,15 +215,18 @@ const AdminUploadPanel = () => {
 
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Data Cell Dashboard</h1>
+          <p className="text-gray-500">Upload and manage university academic records</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-10">
+          
           {/* Student Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all border-t-4 border-blue-500">
             <div className="flex flex-col items-center text-center">
               <div className="bg-blue-100 p-4 rounded-full mb-4"><Users className="text-blue-600" size={32} /></div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Upload Student</h3>
-              <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)} className="mb-3 w-full p-2 border border-gray-300 rounded-lg text-sm">
+              <p className="text-[10px] text-gray-400 mb-2 flex items-center gap-1"><Info size={12}/> Needs: UserID, Name, CGPA</p>
+              <select value={studentSession} onChange={(e) => setStudentSession(e.target.value)} className="mb-3 w-full p-2 border border-gray-300 rounded-lg text-sm bg-gray-50">
                 <option value="">Select Session</option>
                 {sessions.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
               </select>
@@ -247,11 +238,11 @@ const AdminUploadPanel = () => {
           </div>
 
           {/* Teacher Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all border-t-4 border-purple-500">
             <div className="flex flex-col items-center text-center">
               <div className="bg-purple-100 p-4 rounded-full mb-4"><UserCheck className="text-purple-600" size={32} /></div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Upload Teacher</h3>
-              <div className="mb-3 h-[38px]"></div>
+              <div className="mb-[42px]"></div>
               <button onClick={() => teacherInputRef.current.click()} disabled={loadingTeacher} className="w-full bg-[#108944] text-white py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:opacity-70">
                 {loadingTeacher ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                 {loadingTeacher ? "Processing..." : "Upload Now"}
@@ -260,11 +251,11 @@ const AdminUploadPanel = () => {
           </div>
 
           {/* Course Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all border-t-4 border-orange-500">
             <div className="flex flex-col items-center text-center">
               <div className="bg-orange-100 p-4 rounded-full mb-4"><BookOpen className="text-orange-600" size={32} /></div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Upload Course</h3>
-              <div className="mb-3 h-[38px]"></div>
+              <div className="mb-[42px]"></div>
               <button onClick={() => courseInputRef.current.click()} disabled={loadingCourse} className="w-full bg-[#108944] text-white py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:opacity-70">
                 {loadingCourse ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                 {loadingCourse ? "Processing..." : "Upload Now"}
@@ -272,16 +263,16 @@ const AdminUploadPanel = () => {
             </div>
           </div>
 
-          {/* CHR Card — Session dropdown + no spacer */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+          {/* CHR Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all border-t-4 border-green-500">
             <div className="flex flex-col items-center text-center">
               <div className="bg-green-100 p-4 rounded-full mb-4"><FileText className="text-[#108944]" size={32} /></div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">CHR Report</h3>
-              <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)} className="mb-3 w-full p-2 border border-gray-300 rounded-lg text-sm">
+              <p className="text-[10px] text-transparent mb-2">spacer</p>
+              <select value={chrSession} onChange={(e) => setChrSession(e.target.value)} className="mb-3 w-full p-2 border border-gray-300 rounded-lg text-sm bg-gray-50">
                 <option value="">Select Session</option>
                 {sessions.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
               </select>
-              {/* ← Spacer hataya, directly button */}
               <button onClick={() => chrInputRef.current.click()} disabled={loadingChr} className="w-full bg-[#108944] text-white py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-green-700 disabled:opacity-70">
                 {loadingChr ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                 {loadingChr ? "Processing..." : "Upload Now"}
@@ -290,11 +281,12 @@ const AdminUploadPanel = () => {
           </div>
 
           {/* Enrollment Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all border-t-4 border-indigo-500">
             <div className="flex flex-col items-center text-center">
-              <div className="bg-blue-100 p-4 rounded-full mb-4"><Users className="text-blue-600" size={32} /></div>
+              <div className="bg-indigo-100 p-4 rounded-full mb-4"><Users className="text-indigo-600" size={32} /></div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Enrollment</h3>
-              <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)} className="mb-3 w-full p-2 border border-gray-300 rounded-lg text-sm">
+              <p className="text-[10px] text-gray-400 mb-2 flex items-center gap-1"><Info size={12}/> Needs: Section, Grade</p>
+              <select value={enrollmentSession} onChange={(e) => setEnrollmentSession(e.target.value)} className="mb-3 w-full p-2 border border-gray-300 rounded-lg text-sm bg-gray-50">
                 <option value="">Select Session</option>
                 {sessions.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
               </select>

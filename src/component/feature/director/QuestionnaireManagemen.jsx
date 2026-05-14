@@ -57,7 +57,8 @@ const MakeQuestionaire = () => {
       'S': 'Student Evaluation',
       'C': 'Confidential Report',
       'SEC': 'Society Evaluation (Chairperson)',
-      'SEM': 'Society Evaluation (Mentor)'
+      'SEM': 'Society Evaluation (Mentor)',
+      'PE': 'Project Evaluation'
     };
     return types[type] || 'General Questionnaire';
   };

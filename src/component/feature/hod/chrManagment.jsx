@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   ClipboardCheck, Loader2, Calendar, Eye, ArrowLeft,
-  Star, Building2, Clock, Pencil, Save, X, Trash2
+  Star, Clock, Pencil, Save, X, Trash2, Search, Filter
 } from 'lucide-react';
 import DataService from '../../../services/axios';
 
@@ -29,8 +29,14 @@ const formatTime = (val) => {
   return new Date(val).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 };
 
+// ── Score Pill ─────────────────────────────────────────────────────────────
 const ScorePill = ({ score }) => {
-  const map = { 5: ['#d1fae5', '#065f46'], 4: ['#dbeafe', '#1e40af'], 3: ['#fef3c7', '#92400e'], 0: ['#fee2e2', '#991b1b'] };
+  const map = {
+    5: ['#d1fae5', '#065f46'],
+    4: ['#dbeafe', '#1e40af'],
+    3: ['#fef3c7', '#92400e'],
+    0: ['#fee2e2', '#991b1b'],
+  };
   const [bg, fg] = map[score] ?? map[0];
   return (
     <span style={{ background: bg, color: fg, borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -39,6 +45,7 @@ const ScorePill = ({ score }) => {
   );
 };
 
+// ── Status Pill ────────────────────────────────────────────────────────────
 const StatusPill = ({ status }) => {
   const cancelled = status === 'Cancelled';
   return (
@@ -48,6 +55,7 @@ const StatusPill = ({ status }) => {
   );
 };
 
+// ── Table Header Cell ──────────────────────────────────────────────────────
 const Th = ({ ch, center }) => (
   <th style={{ padding: '11px 14px', textAlign: center ? 'center' : 'left', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: '#94a3b8', borderBottom: '1px solid #f1f5f9', whiteSpace: 'nowrap' }}>
     {ch}
@@ -94,7 +102,11 @@ const EditModal = ({ row, onClose, onSaved }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await DataService.put(`/CHR/EditRow/${row.id}`, { LateIn: lateIn, LeftEarly: leftEarly, Remarks: remarks });
+      await DataService.put(`/CHR/EditRow/${row.id}`, {
+        LateIn: lateIn,
+        LeftEarly: leftEarly,
+        Remarks: remarks,
+      });
       onSaved({ ...row, LateIn: lateIn, LeftEarly: leftEarly, Remarks: remarks });
       onClose();
     } catch (err) {
@@ -118,7 +130,9 @@ const EditModal = ({ row, onClose, onSaved }) => {
         </div>
         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Late In (minutes)</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>
+              Late In (minutes)
+            </label>
             <input type="number" min="0" value={lateIn} onChange={e => setLateIn(Number(e.target.value))}
               style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '10px 12px', fontSize: 14, fontWeight: 700, color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} />
             <div style={{ marginTop: 8, background: '#f8fafc', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -128,17 +142,23 @@ const EditModal = ({ row, onClose, onSaved }) => {
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Left Early (minutes)</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>
+              Left Early (minutes)
+            </label>
             <input type="number" min="0" value={leftEarly} onChange={e => setLeftEarly(Number(e.target.value))}
               style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '10px 12px', fontSize: 14, fontWeight: 700, color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} />
           </div>
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>Remarks</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 6 }}>
+              Remarks
+            </label>
             <textarea rows={3} value={remarks} onChange={e => setRemarks(e.target.value)} placeholder="Enter remarks..."
               style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '10px 12px', fontSize: 14, color: '#0f172a', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={onClose} style={{ flex: 1, background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '11px 0', fontWeight: 700, fontSize: 13, color: '#475569', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={onClose} style={{ flex: 1, background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '11px 0', fontWeight: 700, fontSize: 13, color: '#475569', cursor: 'pointer' }}>
+              Cancel
+            </button>
             <button onClick={handleSave} disabled={saving}
               style={{ flex: 2, background: saving ? '#86efac' : '#16a34a', border: 'none', borderRadius: 8, padding: '11px 0', fontWeight: 700, fontSize: 13, color: '#fff', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               {saving ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Save size={14} /> Save Changes</>}
@@ -160,16 +180,26 @@ const CHRManagement = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [activeId,      setActiveId]      = useState(null);
   const [editRow,       setEditRow]       = useState(null);
+  const [activeReportId, setActiveReportId] = useState(null);
 
   // ── Session state ──────────────────────────────────────────────────
   const [sessions,        setSessions]        = useState([]);
   const [selectedSession, setSelectedSession] = useState('');
 
+  // ── Date Dropdown state ────────────────────────────────────────────
+  const [reportDates,  setReportDates]  = useState([]);
+  const [selectedDate, setSelectedDate] = useState('');
+
+  // ── Filter state ───────────────────────────────────────────────────
+  const [filterCourse,  setFilterCourse]  = useState('');
+  const [filterTeacher, setFilterTeacher] = useState('');
+  const [filterLoading, setFilterLoading] = useState(false);
+
   // ── Delete state ───────────────────────────────────────────────────
   const [confirm,  setConfirm]  = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  // ── Sessions fetch ─────────────────────────────────────────────────
+  // ── Fetch sessions ─────────────────────────────────────────────────
   useEffect(() => {
     const fetchSessions = async () => {
       try {
@@ -182,14 +212,36 @@ const CHRManagement = () => {
     fetchSessions();
   }, []);
 
-  // ── Dashboard fetch ────────────────────────────────────────────────
-  const fetchSummary = async (sessionId = '') => {
-    setLoading(true);
-    setDetails(null);
+  // ── Fetch dates (called on mount and whenever session changes) ─────
+  const fetchDates = async (sessionId = '') => {
     try {
       const url = sessionId
-        ? `/CHR/GetHODDashboard?sessionID=${sessionId}`
-        : '/CHR/GetHODDashboard';
+        ? `/CHR/GetReportDates?sessionID=${sessionId}`
+        : '/CHR/GetReportDates';
+      const res = await DataService.get(url);
+      setReportDates(res.data || []);
+      setSelectedDate(''); // reset date selection on session change
+    } catch (err) {
+      console.error('Dates fetch error', err);
+    }
+  };
+
+  // ── Initial load ───────────────────────────────────────────────────
+  useEffect(() => {
+    fetchSummary();
+    fetchDates();
+  }, []);
+
+  // ── Dashboard fetch ────────────────────────────────────────────────
+  const fetchSummary = async (sessionId = '', date = '') => {
+    setLoading(true);
+    setDetails(null);
+    setActiveReportId(null);
+    try {
+      const params = new URLSearchParams();
+      if (sessionId) params.append('sessionID', sessionId);
+      if (date)      params.append('reportDate', date);
+      const url = `/CHR/GetHODDashboard?${params.toString()}`;
       const res = await DataService.get(url);
       setReports(res.data || []);
     } catch (err) {
@@ -199,22 +251,33 @@ const CHRManagement = () => {
     }
   };
 
-  useEffect(() => { fetchSummary(); }, []);
-
+  // ── Session change ─────────────────────────────────────────────────
   const handleSessionChange = (e) => {
     const val = e.target.value;
     setSelectedSession(val);
-    fetchSummary(val);
+    setSelectedDate('');      // reset date when session changes
+    fetchSummary(val, '');
+    fetchDates(val);          // reload dates for new session
+  };
+
+  // ── Date change ────────────────────────────────────────────────────
+  const handleDateChange = (e) => {
+    const val = e.target.value;
+    setSelectedDate(val);
+    fetchSummary(selectedSession, val);
   };
 
   // ── View detail ────────────────────────────────────────────────────
   const handleView = async (reportId) => {
     setActiveId(reportId);
+    setActiveReportId(reportId);
     setDetailLoading(true);
+    setFilterCourse('');
+    setFilterTeacher('');
     try {
       const res  = await DataService.get(`/CHR/GetReportById/${reportId}`);
       const data = Array.isArray(res.data) ? res.data : [res.data];
-      if (data.length === 0) { alert('no record .'); return; }
+      if (data.length === 0) { alert('No record found.'); return; }
       setDetails(data);
     } catch (err) {
       alert('Error: ' + (err.response?.data?.Message || 'Server Error'));
@@ -224,16 +287,49 @@ const CHRManagement = () => {
     }
   };
 
-  const handleBack  = () => setDetails(null);
-  const handleSaved = (updated) => setDetails(prev => prev.map(d => d.id === updated.id ? updated : d));
+  // ── Filter apply ───────────────────────────────────────────────────
+  const handleFilter = async () => {
+    if (!activeReportId) return;
+    setFilterLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.append('reportId', activeReportId);
+      if (filterCourse.trim())  params.append('courseCode',  filterCourse.trim());
+      if (filterTeacher.trim()) params.append('teacherName', filterTeacher.trim());
+      const res  = await DataService.get(`/CHR/FilterReport?${params.toString()}`);
+      const data = Array.isArray(res.data) ? res.data : [res.data];
+      setDetails(data);
+    } catch (err) {
+      alert('Filter error: ' + (err.response?.data?.Message || 'Server Error'));
+    } finally {
+      setFilterLoading(false);
+    }
+  };
+
+  // ── Filter reset ───────────────────────────────────────────────────
+  const handleResetFilter = () => {
+    setFilterCourse('');
+    setFilterTeacher('');
+    handleView(activeReportId);
+  };
+
+  const handleBack = () => {
+    setDetails(null);
+    setActiveReportId(null);
+    setFilterCourse('');
+    setFilterTeacher('');
+  };
+
+  const handleSaved = (updated) =>
+    setDetails(prev => prev.map(d => d.id === updated.id ? updated : d));
 
   // ── Delete handlers ────────────────────────────────────────────────
   const askDeleteBatch = (reportId, date) => {
-    setConfirm({ type: 'batch', id: reportId, message: `"${formatDate(date)}"  report delete ` });
+    setConfirm({ type: 'batch', id: reportId, message: `"${formatDate(date)}" report delete karein?` });
   };
 
   const askDeleteRow = (row) => {
-    setConfirm({ type: 'row', id: row.id, message: `${row.TeacherName} (${row.CourseCode}) record will be delete.` });
+    setConfirm({ type: 'row', id: row.id, message: `${row.TeacherName} (${row.CourseCode}) record delete hoga.` });
   };
 
   const handleConfirmDelete = async () => {
@@ -258,18 +354,26 @@ const CHRManagement = () => {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════════
+  // Render
+  // ══════════════════════════════════════════════════════════════════
   return (
     <div style={{ padding: '2rem', background: '#f8fafc', minHeight: '100vh', fontFamily: "'Segoe UI', sans-serif" }}>
 
-      {/* Confirm Dialog */}
       {confirm && (
-        <ConfirmDialog message={confirm.message} loading={deleting} onConfirm={handleConfirmDelete} onCancel={() => setConfirm(null)} />
+        <ConfirmDialog
+          message={confirm.message}
+          loading={deleting}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirm(null)}
+        />
       )}
-
-      {/* Edit Modal */}
       {editRow && (
-        <EditModal row={editRow} onClose={() => setEditRow(null)} onSaved={handleSaved} />
+        <EditModal
+          row={editRow}
+          onClose={() => setEditRow(null)}
+          onSaved={handleSaved}
+        />
       )}
 
       {/* ── Header ── */}
@@ -286,35 +390,80 @@ const CHRManagement = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
 
-          {/* ── Session Dropdown ── */}
-          <select
-            value={selectedSession}
-            onChange={handleSessionChange}
-            style={{ border: '1.5px solid #bbf7d0', borderRadius: 8, padding: '7px 14px', fontSize: 13, fontWeight: 700, color: '#15803d', background: '#f0fdf4', cursor: 'pointer', outline: 'none', minWidth: 180 }}
-          >
-            <option value="">All Sessions</option>
-            {sessions.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
+          {/* ── Dropdowns (only on list screen) ── */}
+          {!details && (
+            <>
+              {/* Session Dropdown */}
+              <select
+                value={selectedSession}
+                onChange={handleSessionChange}
+                style={{
+                  border: '1.5px solid #bbf7d0', borderRadius: 8,
+                  padding: '7px 14px', fontSize: 13, fontWeight: 700,
+                  color: '#15803d', background: '#f0fdf4',
+                  cursor: 'pointer', outline: 'none', minWidth: 180,
+                }}
+              >
+                <option value="">All Sessions</option>
+                {sessions.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
 
-          {/* Date badge */}
-          {/* <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Calendar size={14} color="#16a34a" />
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#15803d' }}>
-              {new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
-            </span>
-          </div> */}
+              {/* Date Dropdown */}
+              <select
+                value={selectedDate}
+                onChange={handleDateChange}
+                style={{
+                  border: '1.5px solid #bfdbfe', borderRadius: 8,
+                  padding: '7px 14px', fontSize: 13, fontWeight: 700,
+                  color: '#1d4ed8', background: '#eff6ff',
+                  cursor: 'pointer', outline: 'none', minWidth: 180,
+                }}
+              >
+                <option value="">All Dates</option>
+                {reportDates.map((d, i) => (
+                  <option key={i} value={d}>
+                    {formatDate(d)}
+                  </option>
+                ))}
+              </select>
 
+              {/* Reset filters button (shows only when something is selected) */}
+              {(selectedSession || selectedDate) && (
+                <button
+                  onClick={() => {
+                    setSelectedSession('');
+                    setSelectedDate('');
+                    fetchSummary();
+                    fetchDates();
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    background: '#fff', border: '1px solid #e2e8f0',
+                    padding: '7px 14px', borderRadius: 8, fontSize: 13,
+                    fontWeight: 700, color: '#64748b', cursor: 'pointer',
+                  }}
+                >
+                  <X size={13} /> Reset
+                </button>
+              )}
+            </>
+          )}
+
+          {/* Back button (detail screen) */}
           {details && (
-            <button onClick={handleBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e2e8f0', padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, color: '#475569', cursor: 'pointer' }}>
+            <button
+              onClick={handleBack}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #e2e8f0', padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, color: '#475569', cursor: 'pointer' }}
+            >
               <ArrowLeft size={14} /> Back to Reports
             </button>
           )}
         </div>
       </div>
 
-      {/* Loading */}
+      {/* ── Loading spinner ── */}
       {loading && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6rem', color: '#16a34a' }}>
           <Loader2 size={38} className="animate-spin" />
@@ -326,32 +475,21 @@ const CHRManagement = () => {
       {!loading && !details && (
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 20 }}>
           {reports.length > 0 ? reports.map((r, i) => (
-            <div key={r.ReportId ?? i}
+            <div
+              key={r.ReportId ?? i}
               style={{ background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,.04)', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'box-shadow .2s, transform .2s' }}
               onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
               onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.04)'; e.currentTarget.style.transform = 'translateY(0)'; }}
             >
               <div style={{ height: 5, background: 'linear-gradient(90deg,#16a34a,#4ade80)' }} />
-
               <div style={{ padding: '1.4rem 1.3rem 1.1rem', flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-                {/* Icon + Batch Delete */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ background: '#f0fdf4', padding: 10, borderRadius: 12, display: 'flex' }}>
-                      <ClipboardCheck size={22} color="#16a34a" />
-                    </div>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>CHR Report</span>
+                {/* Card Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ background: '#f0fdf4', padding: 10, borderRadius: 12, display: 'flex' }}>
+                    <ClipboardCheck size={22} color="#16a34a" />
                   </div>
-                  <button
-                    onClick={() => askDeleteBatch(r.ReportId, r.ReportDate)}
-                    // style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#e11d48', transition: 'all .15s' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
-                    title="Delete entire report"
-                  >
-                    {/* <Trash2 size={13} /> */}
-                  </button>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>CHR Report</span>
                 </div>
 
                 {/* Date */}
@@ -363,14 +501,14 @@ const CHRManagement = () => {
                   </div>
                 </div>
 
-                {/* Session Name badge */}
+                {/* Session */}
                 {r.SessionName && r.SessionName !== 'N/A' && (
                   <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '8px 12px', fontSize: 12, fontWeight: 700, color: '#1d4ed8' }}>
                     📅 {r.SessionName}
                   </div>
                 )}
 
-                {/* Stats */}
+                {/* Stats grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {[
                     { label: 'Total',     val: r.TotalClasses,     color: '#0f172a', bg: '#f8fafc' },
@@ -386,22 +524,37 @@ const CHRManagement = () => {
                 </div>
               </div>
 
-              {/* View Button */}
-              <button
-                onClick={() => handleView(r.ReportId)}
-                disabled={activeId === r.ReportId}
-                style={{ width: '100%', background: activeId === r.ReportId ? '#dcfce7' : '#16a34a', color: activeId === r.ReportId ? '#16a34a' : '#fff', border: 'none', padding: '14px 0', fontWeight: 700, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: activeId === r.ReportId ? 'not-allowed' : 'pointer', transition: 'background .2s' }}
-                onMouseEnter={e => { if (activeId !== r.ReportId) e.currentTarget.style.background = '#15803d'; }}
-                onMouseLeave={e => { if (activeId !== r.ReportId) e.currentTarget.style.background = '#16a34a'; }}
-              >
-                {activeId === r.ReportId ? <><Loader2 size={15} className="animate-spin" /> Loading...</> : <><Eye size={15} /> View Details</>}
-              </button>
+              {/* Card action buttons */}
+              <div style={{ display: 'flex' }}>
+                <button
+                  onClick={() => handleView(r.ReportId)}
+                  disabled={activeId === r.ReportId}
+                  style={{ flex: 1, background: activeId === r.ReportId ? '#dcfce7' : '#16a34a', color: activeId === r.ReportId ? '#16a34a' : '#fff', border: 'none', padding: '14px 0', fontWeight: 700, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: activeId === r.ReportId ? 'not-allowed' : 'pointer', transition: 'background .2s' }}
+                  onMouseEnter={e => { if (activeId !== r.ReportId) e.currentTarget.style.background = '#15803d'; }}
+                  onMouseLeave={e => { if (activeId !== r.ReportId) e.currentTarget.style.background = '#16a34a'; }}
+                >
+                  {activeId === r.ReportId
+                    ? <><Loader2 size={15} className="animate-spin" /> Loading...</>
+                    : <><Eye size={15} /> View Details</>}
+                </button>
+                <button
+                  onClick={() => askDeleteBatch(r.ReportId, r.ReportDate)}
+                  style={{ width: 48, background: '#fff1f2', border: 'none', borderLeft: '1px solid #fecdd3', color: '#e11d48', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
+                  title="Delete this report"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
             </div>
           )) : (
             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem 2rem', background: '#fff', borderRadius: 16, border: '2px dashed #e2e8f0' }}>
               <ClipboardCheck size={36} color="#cbd5e1" style={{ marginBottom: 12 }} />
               <p style={{ color: '#94a3b8', fontWeight: 700, margin: 0 }}>
-                {selectedSession ? 'No CHR .' : 'No CHR Reports found.'}
+                {selectedSession || selectedDate
+                  ? 'No CHR reports found for this selection.'
+                  : 'No CHR Reports found.'}
               </p>
             </div>
           )}
@@ -419,21 +572,74 @@ const CHRManagement = () => {
           <div style={{ maxWidth: 1200, margin: '0 auto', background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,.04)', overflow: 'hidden' }}>
 
             {/* Table top bar */}
-            <div style={{ padding: '1rem 1.25rem', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Detailed Attendance Report</h2>
-                <p style={{ margin: '2px 0 0', fontSize: 13, fontWeight: 600, color: '#16a34a' }}>
-                  {formatDate(details[0]?.ClassDate)} — {formatTime(details[0]?.ClassDate)}
-                </p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ background: '#f1f5f9', padding: '5px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800, color: '#64748b' }}>
-                  {details.length} records
-                </span>
-                {details.filter(d => (d.LateIn + (d.LeftEarly ?? 0)) >= 10).length > 0 && (
-                  <span style={{ background: '#fee2e2', padding: '5px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800, color: '#991b1b' }}>
-                    {details.filter(d => (d.LateIn + (d.LeftEarly ?? 0)) >= 10).length} cancelled
+            <div style={{ padding: '1rem 1.25rem', background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Detailed Attendance Report</h2>
+                  <p style={{ margin: '2px 0 0', fontSize: 13, fontWeight: 600, color: '#16a34a' }}>
+                    {formatDate(details[0]?.ClassDate)} — {formatTime(details[0]?.ClassDate)}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ background: '#f1f5f9', padding: '5px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800, color: '#64748b' }}>
+                    {details.length} records
                   </span>
+                  {details.filter(d => (d.LateIn + (d.LeftEarly ?? 0)) >= 10).length > 0 && (
+                    <span style={{ background: '#fee2e2', padding: '5px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800, color: '#991b1b' }}>
+                      {details.filter(d => (d.LateIn + (d.LeftEarly ?? 0)) >= 10).length} cancelled
+                    </span>
+                  )}
+                  {/* Delete entire report batch */}
+                  <button
+                    onClick={() => askDeleteBatch(activeReportId, details[0]?.ClassDate)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff1f2', border: '1.5px solid #fecdd3', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 700, color: '#e11d48', cursor: 'pointer', transition: 'all .15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#e11d48'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; e.currentTarget.style.borderColor = '#fecdd3'; }}
+                  >
+                    <Trash2 size={13} /> Delete Report
+                  </button>
+                </div>
+              </div>
+
+              {/* Filter Bar */}
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: 160 }}>
+                  <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input
+                    type="text"
+                    placeholder="Filter by Course..."
+                    value={filterCourse}
+                    onChange={e => setFilterCourse(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleFilter()}
+                    style={{ width: '100%', paddingLeft: 32, paddingRight: 12, paddingTop: 8, paddingBottom: 8, border: '1.5px solid #e2e8f0', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div style={{ position: 'relative', flex: 1, minWidth: 160 }}>
+                  <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input
+                    type="text"
+                    placeholder="Filter by Teacher..."
+                    value={filterTeacher}
+                    onChange={e => setFilterTeacher(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleFilter()}
+                    style={{ width: '100%', paddingLeft: 32, paddingRight: 12, paddingTop: 8, paddingBottom: 8, border: '1.5px solid #e2e8f0', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <button
+                  onClick={handleFilter}
+                  disabled={filterLoading}
+                  style={{ background: filterLoading ? '#86efac' : '#16a34a', border: 'none', borderRadius: 8, padding: '8px 18px', fontWeight: 700, fontSize: 13, color: '#fff', cursor: filterLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  {filterLoading ? <Loader2 size={14} className="animate-spin" /> : <Filter size={14} />}
+                  {filterLoading ? 'Filtering...' : 'Apply'}
+                </button>
+                {(filterCourse || filterTeacher) && (
+                  <button
+                    onClick={handleResetFilter}
+                    style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 14px', fontWeight: 700, fontSize: 13, color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <X size={14} /> Reset
+                  </button>
                 )}
               </div>
             </div>
@@ -454,11 +660,12 @@ const CHRManagement = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {details.map((d, i) => {
+                  {details.length > 0 ? details.map((d, i) => {
                     const score  = calcScore(d.LateIn, d.LeftEarly);
                     const status = computeStatus(d.LateIn, d.LeftEarly, d.Status);
                     return (
-                      <tr key={i}
+                      <tr
+                        key={i}
                         style={{ borderTop: '1px solid #f1f5f9', background: status === 'Cancelled' ? '#fff8f8' : i % 2 === 0 ? '#fff' : '#fafafa', transition: 'background .15s' }}
                         onMouseEnter={e => { e.currentTarget.style.background = '#f0fdf4'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = status === 'Cancelled' ? '#fff8f8' : i % 2 === 0 ? '#fff' : '#fafafa'; }}
@@ -481,36 +688,44 @@ const CHRManagement = () => {
                             {d.LeftEarly}
                           </span>
                         </td>
-                        <td style={{ padding: '11px 14px', textAlign: 'center' }}><ScorePill score={score} /></td>
-                        <td style={{ padding: '11px 14px' }}><StatusPill status={status} /></td>
+                        <td style={{ padding: '11px 14px', textAlign: 'center' }}>
+                          <ScorePill score={score} />
+                        </td>
+                        <td style={{ padding: '11px 14px' }}>
+                          <StatusPill status={status} />
+                        </td>
                         <td style={{ padding: '11px 14px', color: d.Remarks ? 'black' : '#94a3b8', fontSize: d.Remarks ? '14px' : '12px', fontStyle: d.Remarks ? 'normal' : 'italic', fontWeight: d.Remarks ? 'bold' : 'normal', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {d.Remarks || 'No remarks'}
                         </td>
-
-                        {/* ── Actions: Edit + Delete ── */}
                         <td style={{ padding: '11px 14px', textAlign: 'center' }}>
                           <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                            {/* <button
+                            <button
                               onClick={() => setEditRow(d)}
                               style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#2563eb', transition: 'all .15s' }}
                               onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.color = '#fff'; }}
                               onMouseLeave={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.color = '#2563eb'; }}
                             >
                               <Pencil size={12} /> Edit
-                            </button> */}
-                            {/* <button
+                            </button>
+                            <button
                               onClick={() => askDeleteRow(d)}
                               style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#e11d48', transition: 'all .15s' }}
                               onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; }}
                               onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
                             >
                               <Trash2 size={12} /> Del
-                            </button> */}
+                            </button>
                           </div>
                         </td>
                       </tr>
                     );
-                  })}
+                  }) : (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8', fontWeight: 700 }}>
+                        No records match the filter.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
