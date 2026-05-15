@@ -48,24 +48,86 @@ const ConfidentialEvaluationsForm = () => {
       setSubmitting(true);
 
       // ── Step 1: Dexie records banao ─────────────────────────────────────
-      const dexieRecords = Object.entries(answers).map(([qId, score]) => ({
-        studentId:    String(user.id),
-        studentName:  user.name || '',
-        enrollmentId: parseInt(course.EnrollmentId || course.enrollmentId),
-        questionId:   parseInt(qId),
-        score:        parseInt(score),
-        teacherId:    String(course.TeacherId || course.teacherId || ''),
-        teacherName:  course.TeacherName || '',
-        sessionId:    String(course.SessionId || course.sessionId || ''),
-        sessionName:  course.SessionName || user.sessionName || '',
-        courseCode:   course.CourseCode || '',
-        courseTitle:  course.CourseTitle || '',
-        questionText:
-          questions.find(q => String(q.QuestionId) === String(qId))?.Text ||
-          questions.find(q => String(q.QuestionId) === String(qId))?.QuestionText ||
-          '',
-        submittedAt: new Date().toISOString()
-      }));
+      // const dexieRecords = Object.entries(answers).map(([qId, score]) => ({
+      //   studentId:    String(user.id),
+      //   studentName:  user.name || '',
+      //   enrollmentId: parseInt(course.EnrollmentId || course.enrollmentId),
+      //   questionId:   parseInt(qId),
+      //   score:        parseInt(score),
+      //   teacherId:    String(course.TeacherId || course.teacherId || ''),
+      //   teacherName:  course.TeacherName || '',
+      //   sessionId:    String(course.SessionId || course.sessionId || ''),
+      //   sessionName:  course.SessionName || user.sessionName || '',
+      //   courseCode:   course.CourseCode || '',
+      //   courseTitle:  course.CourseTitle || '',
+      //   questionText:
+      //     questions.find(q => String(q.QuestionId) === String(qId))?.Text ||
+      //     questions.find(q => String(q.QuestionId) === String(qId))?.QuestionText ||
+      //     '',
+      //   submittedAt: new Date().toISOString()
+      // }));
+
+// ── Step 1: Dexie records banao ─────────────────────────────────────
+const dexieRecords = Object.entries(answers).map(([qId, score]) => {
+  const selectedQuestion =
+    questions.find(q => String(q.QuestionId) === String(qId));
+
+  return {
+    // ─────────────────────────────────────────
+    // Student Info
+    // ─────────────────────────────────────────
+    studentId: String(user.id),
+    studentName: user.name || '',
+
+    // ─────────────────────────────────────────
+    // Enrollment / Teacher / Session
+    // ─────────────────────────────────────────
+    enrollmentId: parseInt(course.EnrollmentId || course.enrollmentId),
+    
+    teacherId: String(course.TeacherId || course.teacherId || ''),
+    teacherName: course.TeacherName || '',
+
+    sessionId: String(course.SessionId || course.sessionId || ''),
+    sessionName: course.SessionName || user.sessionName || '',
+
+    // ─────────────────────────────────────────
+    // Course Info
+    // ─────────────────────────────────────────
+    courseCode: course.CourseCode || '',
+    courseTitle: course.CourseTitle || '',
+
+    // ─────────────────────────────────────────
+    // Question Info
+    // ─────────────────────────────────────────
+    questionId: parseInt(qId),
+    questionText:
+      selectedQuestion?.Text ||
+      selectedQuestion?.QuestionText ||
+      '',
+
+    // ✅ IMPORTANT
+    // Question type + critical flag save karo
+    questionType:
+      selectedQuestion?.Type ||
+      selectedQuestion?.type ||
+      'Confidential',
+
+    isCritical:
+      selectedQuestion?.isCritical === true ||
+      selectedQuestion?.isCritical === 1,
+
+    // ─────────────────────────────────────────
+    // Score
+    // ─────────────────────────────────────────
+    score: parseInt(score),
+
+    // ─────────────────────────────────────────
+    // Meta
+    // ─────────────────────────────────────────
+    submittedAt: new Date().toISOString()
+  };
+});
+
 
       // ── Step 2: Dexie mein save karo ────────────────────────────────────
       await db.evaluations.bulkPut(dexieRecords);

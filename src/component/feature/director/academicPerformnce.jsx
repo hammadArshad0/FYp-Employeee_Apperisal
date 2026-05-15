@@ -196,7 +196,12 @@ function AcademicPerformance() {
             className="w-full bg-gray-50 border-none p-4 rounded-2xl font-bold text-gray-700 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
           >
             <option value="All">All Courses</option>
-            {courses.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
+          {courses.map((c, idx) => (
+    <option key={idx} value={c.code}>
+        {c.code} - {c.title}
+    </option>
+))}
+       
           </select>
         </div>
       </div>

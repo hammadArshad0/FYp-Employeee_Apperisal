@@ -52,6 +52,7 @@ import QuestionRatingDetail from './component/feature/director/courseEvalutionQu
 import CriticalAnalyticsScreen from './component/feature/director/criticalAnalytics';
 import ManageCommittee from './component/feature/director/ManageCommittee';
 import ProjectEvaluation from './component/feature/director/ProjectEvaluation';
+import TopPerformanceDashboard from './component/feature/director/topPerformanceCount';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -105,6 +106,7 @@ const App = () => {
           <Route path="critical-analytics" element={<CriticalAnalyticsScreen />} />
           <Route path="manage-committee" element={<ManageCommittee />} />
           <Route path="project-evaluation" element={<ProjectEvaluation />}  />
+          <Route path="top-performers" element={<TopPerformanceDashboard />} />
         </Route>
 
         {/* --- HOD ROUTES --- */}
