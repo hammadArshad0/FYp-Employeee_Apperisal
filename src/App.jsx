@@ -53,6 +53,8 @@ import CriticalAnalyticsScreen from './component/feature/director/criticalAnalyt
 import ManageCommittee from './component/feature/director/ManageCommittee';
 import ProjectEvaluation from './component/feature/director/ProjectEvaluation';
 import TopPerformanceDashboard from './component/feature/director/topPerformanceCount';
+import KPIBasePerformance from './component/feature/director/kpiBasePerformance';
+import KPIBaseComparison from './component/feature/director/kpiBaseComparison';
 
 // --- PROTECTED ROUTE LOGIC ---
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -107,6 +109,8 @@ const App = () => {
           <Route path="manage-committee" element={<ManageCommittee />} />
           <Route path="project-evaluation" element={<ProjectEvaluation />}  />
           <Route path="top-performers" element={<TopPerformanceDashboard />} />
+          <Route path="kpibase-evaluation" element={<KPIBasePerformance />} />
+          <Route path="kpibase-comparison" element={<KPIBaseComparison/>} />
         </Route>
 
         {/* --- HOD ROUTES --- */}

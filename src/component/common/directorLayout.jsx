@@ -18,13 +18,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'See Performance', path: '/director-dashboard/performance', icon: <BarChart3 size={30} /> },
     { name: 'Confidential Evalutions', path: '/director-dashboard/confidential', icon: <Lock size={30} /> },
     {name: 'email Settings', path: '/director-dashboard/email', icon: <Lock size={30} /> },
-    // {name: 'filter Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> },
+    {name: 'filter Performance', path: '/director-dashboard/filter-performance', icon: <BarChart3 size={30} /> },
     {name: 'Academic Performance', path: '/director-dashboard/academic-performance', icon: <BarChart3 size={30} /> },
     {name: 'Course Evaluation', path: '/director-dashboard/course-evaluation', icon: <BarChart3 size={30} /> },
     {name:'Critical Analytics',path:'/director-dashboard/critical-analytics',icon:<BarChart3 size={30} />},
     {name:'Manage Committee',path:'/director-dashboard/manage-committee',icon:<BarChart3 size={30} />},
     {name:'Project Evaluation',path:'/director-dashboard/project-evaluation',icon:<BarChart3 size={30} />},
     {name:'top Performers',path:'/director-dashboard/top-performers',icon:<BarChart3 size={30} />},
+    {name:"kpibase Evaluation",path:'/director-dashboard/kpibase-evaluation',icon:<BarChart3 size={30} />},
+    {name:'kpi baseComparison',path:'/director-dashboard/kpibase-comparison',icon:<BarChart3 size={30} />},
   ];
 
   return (
